@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# VNUK ParkWise — The Silent Gate
 
-## Getting Started
+Campus smart parking for **students**, **guards**, and **admins**: RFID / Backup Pass, membership plans, Early Arrival rewards, and Kill-Switch.
 
-First, run the development server:
+**Live demo (frontend):** [smart-parking-phi-seven.vercel.app](https://smart-parking-phi-seven.vercel.app)  
+*(API must be running locally + Cloudflare tunnel for login to work.)*
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## Repository layout
+
+```text
+smart-parking/
+├── frontend/                 # Next.js web app (deploy to Vercel → root: frontend)
+│   └── zalo-miniapp/         # Zalo Mini App (Vite + zmp)
+├── backend/                  # Express + MongoDB API (:4000)
+│   └── parkwise-sqlite/      # Optional SQLite gate demo (:5050)
+├── docs/                     # Architecture, demo guide, rewards
+├── infra/                    # Docker Compose (Mongo, Mosquitto)
+└── scripts/                  # Helper scripts (Zalo tunnel, DB UI)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Quick start
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 1. API
 
-## Learn More
+```bash
+cd backend
+cp .env.example .env          # set MONGODB_URI, JWT_SECRET, CORS_ORIGIN
+npm install
+npm run seed
+npm run dev                   # → http://localhost:4000
+```
 
-To learn more about Next.js, take a look at the following resources:
+### 2. Web
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+cd frontend
+cp .env.example .env.local    # NEXT_PUBLIC_API_URL=http://localhost:4000
+npm install
+npm run dev                   # → http://localhost:3000
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+From repo root (after `npm install` in each package):
 
-## Deploy on Vercel
+```bash
+npm run dev:backend
+npm run dev:frontend
+npm run seed
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Demo accounts (local / DEMO only)
+
+| Role | Login | Password |
+|------|-------|----------|
+| Student Nhi | `STU-NHI` | `password123` |
+| Student Tân | `STU-TAN` | `password123` |
+| Student Nghĩa | `STU-NGHIA` | `password123` |
+| Guard | `G-1001` | `password123` |
+| Admin | `A-9001` | `password123` |
+
+RFID tags: `RFID-NHI-001`, `RFID-TAN-001`, `RFID-NGHIA-001`
+
+---
+
+## Deploy (Vercel frontend)
+
+1. Import this repo on Vercel  
+2. **Root Directory:** `frontend`  
+3. Env: `NEXT_PUBLIC_API_URL` = public HTTPS API URL  
+4. On the API host, set:
+   - `CORS_ORIGIN=https://your-app.vercel.app`
+   - `CROSS_SITE_COOKIES=true`
+
+Auth on Vercel uses a **Bearer token** in `localStorage` (cross-site cookies to tunnels are unreliable).
+
+---
+
+## Optional demos
+
+| Command | What |
+|---------|------|
+| `npm run parkwise:zalo` | Zalo mini app + sqlite API + tunnel helpers |
+| `npm run parkwise:sqlite` | SQLite gate backend only |
+| `npm run infra:up` | Mongo + Mosquitto via Docker |
+
+More: [docs/DEMO_GUIDE.md](./docs/DEMO_GUIDE.md) · [docs/REWARDS.md](./docs/REWARDS.md) · [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md)
