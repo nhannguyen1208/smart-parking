@@ -1,0 +1,30 @@
+{
+  "app": {
+    "title": "ParkWise",
+    "headerTitle": "ParkWise",
+    "headerColor": "#0068ff",
+    "textColor": "white",
+    "leftButton": "back",
+    "statusBar": "normal",
+    "actionBarHidden": true,
+    "hideAndroidBottomNavigationBar": true,
+    "hideIOSSafeAreaBottom": true
+  },
+  "listCSS": [
+    "./assets/index.D8OW_r25.css"
+  ],
+  "listSyncJS": [
+    "inline.js",
+    "./assets/index.B48aMLU2.module.js"
+  ],
+  "listAsyncJS": [],
+  "pages": [],
+  "permission": {
+    "userInfo": {
+      "needUserInfo": true
+    },
+    "userPhonenumber": {
+      "needUserPhonenumber": true
+    }
+  }
+}

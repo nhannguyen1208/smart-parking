@@ -1,0 +1,30 @@
+{
+  "name": "parkwise-zalo-miniapp",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && zmp sync-config dist/index.html",
+    "preview": "vite preview",
+    "zmp:login": "zmp login",
+    "zmp:init": "zmp init",
+    "zmp:start": "zmp start",
+    "zmp:device": "zmp start -D",
+    "zmp:deploy": "npm run build && zmp deploy -e -p -o dist -m \"ParkWise dev\"",
+    "zmp:deploy:ui": "npm run build && zmp deploy -e -o dist",
+    "zmp:sync": "zmp sync-config dist/index.html"
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "socket.io-client": "^4.8.1",
+    "zmp-sdk": "^2.53.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.0.14",
+    "@vitejs/plugin-react": "^4.3.4",
+    "tailwindcss": "^4.0.14",
+    "vite": "^6.2.2"
+  }
+}
