@@ -26,18 +26,23 @@ export function RedeemConfirmationDialog({
   useEffect(() => {
     if (!open) return undefined;
     document.getElementById(confirmId)?.focus();
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape" && !busy) onCancel();
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener("keydown", onKey);
+    };
   }, [open, busy, onCancel, confirmId]);
 
   if (!open || !item) return null;
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-navy/40 p-4 sm:items-center"
+      className="fixed inset-0 z-[60] flex items-end justify-center bg-navy/40 p-0 sm:items-center sm:p-4"
       role="presentation"
       onClick={(e) => {
         if (e.target === e.currentTarget && !busy) onCancel();
@@ -48,8 +53,12 @@ export function RedeemConfirmationDialog({
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={descId}
-        className="w-full max-w-md rounded-[18px] border border-border bg-white p-5 shadow-[var(--shadow-soft)] sm:p-6"
+        className="w-full max-w-md rounded-t-[22px] border border-border bg-white p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-[var(--shadow-soft)] sm:rounded-[18px] sm:p-6 sm:pb-6"
       >
+        <div
+          className="mx-auto mb-3 h-1 w-10 rounded-full bg-border sm:hidden"
+          aria-hidden
+        />
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand-blue">
           Confirm redemption
         </p>

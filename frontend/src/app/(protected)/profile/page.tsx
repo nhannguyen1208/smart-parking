@@ -2,13 +2,20 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
+import { ChevronRight, CreditCard, HelpCircle, QrCode } from "lucide-react";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
+import { MobileAppHeader } from "@/components/layout/mobile-app-header";
 import { VNUKWordmark } from "@/components/layout/vnuk-wordmark";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { useAuth } from "@/context/auth-context";
 import { api, ApiError } from "@/lib/api-client";
 import type { ProfileData } from "@/lib/types";
 
 export default function ProfilePage() {
   const pathname = usePathname();
+  const { logout } = useAuth();
   const [data, setData] = useState<ProfileData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -85,8 +92,10 @@ export default function ProfilePage() {
 
   return (
     <DashboardShell>
-      <div className="mx-auto max-w-2xl space-y-8 pb-10">
-        <header>
+      <div className="app-page mx-auto max-w-2xl space-y-5 md:space-y-8 pb-4">
+        <MobileAppHeader title="Profile" subtitle="ID, membership & access" />
+
+        <header className="hidden md:block">
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-red">
             Digital ID
           </p>
@@ -97,6 +106,34 @@ export default function ProfilePage() {
             University of Danang — VN-UK Institute for Research and Executive Education
           </p>
         </header>
+
+        <Card className="divide-y divide-border overflow-hidden p-0 md:hidden">
+          {[
+            { href: "/membership", label: "Membership", hint: "Plans & renew", icon: CreditCard },
+            { href: "/qr-pass", label: "Backup Pass", hint: "QR when you forget your card", icon: QrCode },
+            { href: "/help", label: "Help / SOS", hint: "Campus assistance", icon: HelpCircle },
+          ].map((item) => {
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="flex items-center gap-3 px-4 py-3.5 active:bg-surface"
+              >
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-light/70 text-brand-blue">
+                  <Icon className="h-4 w-4" aria-hidden />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm font-semibold text-navy">
+                    {item.label}
+                  </span>
+                  <span className="block text-xs text-muted">{item.hint}</span>
+                </span>
+                <ChevronRight className="h-4 w-4 text-muted" aria-hidden />
+              </Link>
+            );
+          })}
+        </Card>
 
         <div className="relative mx-auto w-full max-w-[520px]">
           <div
@@ -216,6 +253,15 @@ export default function ProfilePage() {
             </div>
           </article>
         </div>
+
+        <Button
+          type="button"
+          variant="secondary"
+          className="h-11 w-full md:hidden"
+          onClick={() => void logout()}
+        >
+          Sign out
+        </Button>
       </div>
     </DashboardShell>
   );

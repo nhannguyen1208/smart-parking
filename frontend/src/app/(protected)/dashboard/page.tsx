@@ -1,10 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ChevronRight, QrCode, Ticket } from "lucide-react";
 import { RewardsSnapshot } from "@/components/dashboard/rewards-snapshot";
 import { WeatherForecastBar } from "@/components/dashboard/weather-forecast-bar";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
+import { MobileAppHeader } from "@/components/layout/mobile-app-header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useMembership } from "@/context/membership-context";
@@ -64,8 +67,12 @@ export default function DashboardPage() {
 
   return (
     <DashboardShell>
-      <div className="space-y-6">
-        <header className="animate-fade-up">
+      <div className="app-page space-y-4 md:space-y-6">
+        {/* Mobile app header */}
+        <MobileAppHeader showGreeting />
+
+        {/* Desktop header */}
+        <header className="hidden animate-fade-up md:block">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-blue">
             Dashboard
           </p>
@@ -78,42 +85,119 @@ export default function DashboardPage() {
           </p>
         </header>
 
-        <WeatherForecastBar />
+        {/* Primary: parking status */}
+        <Card className="animate-fade-up overflow-hidden border-brand-blue/15 p-0">
+          <div className="bg-gradient-to-br from-[#0b2e59] to-[#005daa] px-4 py-4 text-white sm:px-5 sm:py-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">
+                  Campus parking
+                </p>
+                <p className="mt-1 text-3xl font-semibold tabular-nums tracking-tight">
+                  {parkingSummary.occupancy}%
+                  <span className="ml-2 text-sm font-medium text-white/80">
+                    occupied
+                  </span>
+                </p>
+                <p className="mt-1 text-sm text-white/80">
+                  {parkingSummary.occupancyLabel} · {parkingSummary.totalAvailable}{" "}
+                  spaces free
+                </p>
+              </div>
+              <span className="rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-semibold ring-1 ring-white/20">
+                Live
+              </span>
+            </div>
+            <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/20">
+              <div
+                className="h-full rounded-full bg-white"
+                style={{
+                  width: `${Math.min(100, Math.max(0, parkingSummary.occupancy))}%`,
+                }}
+              />
+            </div>
+          </div>
+          <div className="space-y-3 px-4 py-4 sm:px-5">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+              <div>
+                <p className="text-xs text-muted">Your vehicle</p>
+                <p className="font-semibold text-navy">
+                  {user.vehicleNumber || "Not registered"}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-muted">Membership</p>
+                <p className="font-semibold text-navy">
+                  {activeMembership
+                    ? `${activeMembership.planName ?? activeMembership.status}`
+                    : "No plan"}
+                </p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Button href="/qr-pass" className="h-11 w-full gap-2 px-3 text-sm">
+                <QrCode className="h-4 w-4" aria-hidden />
+                Backup Pass
+              </Button>
+              <Button
+                href="/parking"
+                variant="secondary"
+                className="h-11 w-full px-3 text-sm"
+              >
+                Lot details
+              </Button>
+            </div>
+          </div>
+        </Card>
 
-        <div className="animate-fade-up-delay-1">
-          <RewardsSnapshot />
-        </div>
-
-        {activeMembership && activeMembership.daysLeft <= 7 && (
-          <Card className="animate-fade-up-delay-1 flex flex-wrap items-center gap-4 border-amber-200/70 bg-gradient-to-r from-[#fff8ef] to-white p-5">
-            <span className="rounded-full bg-[#fff4e5] px-3 py-1.5 text-xs font-semibold text-[#b45309] ring-1 ring-[#f6d7a8]">
+        {activeMembership && activeMembership.daysLeft <= 7 ? (
+          <Card className="flex flex-wrap items-center gap-3 border-amber-200/70 bg-[#fff8ef] p-4">
+            <span className="rounded-full bg-[#fff4e5] px-2.5 py-1 text-xs font-semibold text-[#b45309] ring-1 ring-[#f6d7a8]">
               {activeMembership.daysLeft} days left
             </span>
-            <p className="flex-1 text-sm text-navy">
-              Your {activeMembership.planName ?? "parking"} pass expires soon.
+            <p className="min-w-0 flex-1 text-sm text-navy">
+              Your pass expires soon.
             </p>
-            <Button href="/membership" variant="secondary" className="h-11 px-7">
-              Renew now
+            <Button href="/membership" variant="secondary" className="h-10 px-4">
+              Renew
             </Button>
           </Card>
-        )}
+        ) : null}
 
-        <div className="grid gap-4 md:grid-cols-3">
+        {/* Rewards */}
+        <section className="animate-fade-up-delay-1 space-y-2">
+          <div className="flex items-center justify-between px-0.5 md:hidden">
+            <h2 className="text-sm font-semibold text-navy">Rewards</h2>
+            <Link
+              href="/rewards"
+              className="inline-flex items-center gap-0.5 text-xs font-semibold text-brand-blue"
+            >
+              Open
+              <ChevronRight className="h-3.5 w-3.5" aria-hidden />
+            </Link>
+          </div>
+          <RewardsSnapshot />
+        </section>
+
+        {/* Weather — secondary on mobile */}
+        <div className="animate-fade-up-delay-2">
+          <WeatherForecastBar />
+        </div>
+
+        {/* Desktop stats grid */}
+        <div className="hidden gap-4 md:grid md:grid-cols-3">
           <StatCard
-            className="animate-fade-up-delay-1"
             label="Parking occupancy"
             value={`${parkingSummary.occupancy}%`}
             hint={parkingSummary.occupancyLabel}
             progress={parkingSummary.occupancy}
           />
           <StatCard
-            className="animate-fade-up-delay-2"
             label="Available capacity"
             value={String(parkingSummary.totalAvailable)}
             hint={`of ${parkingSummary.totalCapacity} spaces`}
           />
           <StatCard
-            className="animate-fade-up-delay-3"
             label="Membership"
             value={activeMembership?.status ?? "NONE"}
             hint={
@@ -125,46 +209,71 @@ export default function DashboardPage() {
           />
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-3">
-          {quickActions.map((action, index) => (
-            <QuickAction
-              key={action.href + action.title}
-              className={
-                index === 0
-                  ? "animate-fade-up-delay-1"
-                  : index === 1
-                    ? "animate-fade-up-delay-2"
-                    : "animate-fade-up-delay-3"
-              }
-              title={action.title}
-              description={action.description}
-              href={action.href}
-              action={action.actionLabel}
-            />
-          ))}
-        </div>
+        {/* Shortcuts */}
+        <section className="animate-fade-up-delay-2">
+          <h2 className="mb-2 px-0.5 text-sm font-semibold text-navy md:mb-3 md:text-base">
+            Shortcuts
+          </h2>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:gap-4">
+            {quickActions.map((action) => (
+              <Link
+                key={action.href + action.title}
+                href={action.href}
+                className="flex min-h-[96px] flex-col justify-between rounded-[14px] border border-border/80 bg-white p-3.5 shadow-[var(--shadow-card)] transition active:scale-[0.98] md:min-h-[140px] md:p-5"
+              >
+                <div>
+                  <p className="text-sm font-semibold text-navy">{action.title}</p>
+                  <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted md:text-sm">
+                    {action.description}
+                  </p>
+                </div>
+                <span className="mt-3 text-xs font-semibold text-brand-blue">
+                  {action.actionLabel}
+                </span>
+              </Link>
+            ))}
+            <Link
+              href="/membership"
+              className="flex min-h-[96px] flex-col justify-between rounded-[14px] border border-border/80 bg-white p-3.5 shadow-[var(--shadow-card)] transition active:scale-[0.98] md:hidden"
+            >
+              <div>
+                <Ticket className="mb-1 h-4 w-4 text-brand-blue" aria-hidden />
+                <p className="text-sm font-semibold text-navy">Membership</p>
+                <p className="mt-1 text-xs text-muted">Plans & billing</p>
+              </div>
+              <span className="mt-3 text-xs font-semibold text-brand-blue">
+                Manage
+              </span>
+            </Link>
+          </div>
+        </section>
 
-        <Card className="animate-fade-up-delay-2 p-5 md:p-6">
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <h2 className="text-base font-semibold text-navy">
-              Automatic parking activity
+        {/* Recent activity */}
+        <Card className="animate-fade-up-delay-3 p-4 md:p-6">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <h2 className="text-sm font-semibold text-navy md:text-base">
+              Recent activity
             </h2>
             <Button href="/history" variant="ghost" className="h-9 px-3 text-xs">
               View all
             </Button>
           </div>
-          <div className="space-y-2.5">
+          <ul className="space-y-2">
             {parkingHistory.slice(0, 3).map((item) => (
-              <div
+              <li
                 key={`${item.date}-${item.time}`}
-                className="flex flex-wrap gap-4 rounded-[12px] bg-surface px-3.5 py-3 text-sm text-navy"
+                className="flex items-center justify-between gap-3 rounded-[12px] bg-surface px-3.5 py-3 text-sm"
               >
-                <span className="w-24 font-medium">{item.date}</span>
-                <span className="w-20 text-muted">{item.time}</span>
-                <span className="capitalize text-muted">{item.event}</span>
-              </div>
+                <div className="min-w-0">
+                  <p className="font-medium capitalize text-navy">{item.event}</p>
+                  <p className="text-xs text-muted">
+                    {item.date} · {item.time}
+                  </p>
+                </div>
+                <span className="shrink-0 text-xs text-muted">Gate</span>
+              </li>
             ))}
-          </div>
+          </ul>
         </Card>
       </div>
     </DashboardShell>
@@ -174,12 +283,9 @@ export default function DashboardPage() {
 function LoadingBlock({ label }: { label: string }) {
   return (
     <div className="space-y-4">
-      <div className="h-8 w-56 animate-pulse rounded-lg bg-surface" />
-      <div className="grid gap-4 md:grid-cols-3">
-        {[1, 2, 3].map((item) => (
-          <div key={item} className="h-32 animate-pulse rounded-[16px] bg-surface" />
-        ))}
-      </div>
+      <div className="h-8 w-40 animate-pulse rounded-lg bg-surface md:w-56" />
+      <div className="h-44 animate-pulse rounded-[16px] bg-surface" />
+      <div className="h-36 animate-pulse rounded-[16px] bg-surface" />
       <p className="text-sm text-muted">{label}</p>
     </div>
   );
@@ -210,39 +316,11 @@ function StatCard({
       {typeof progress === "number" && (
         <div className="mt-4 h-2 overflow-hidden rounded-full bg-surface">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-brand-blue to-[#3b82c4]"
+            className="h-full rounded-full bg-brand-blue"
             style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
           />
         </div>
       )}
-    </Card>
-  );
-}
-
-function QuickAction({
-  title,
-  description,
-  href,
-  action,
-  className = "",
-}: {
-  title: string;
-  description: string;
-  href: string;
-  action: string;
-  className?: string;
-}) {
-  return (
-    <Card className={`flex min-h-[168px] flex-col justify-between p-5 ${className}`}>
-      <div>
-        <h3 className="text-base font-semibold text-navy">{title}</h3>
-        <p className="mt-2 max-w-[300px] text-sm leading-relaxed text-muted">
-          {description}
-        </p>
-      </div>
-      <Button href={href} variant="secondary" className="mt-5 w-fit px-5">
-        {action}
-      </Button>
     </Card>
   );
 }

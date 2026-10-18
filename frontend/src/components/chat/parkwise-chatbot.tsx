@@ -166,7 +166,7 @@ export function ParkWiseChatbot({
   }
 
   return (
-    <div className="pointer-events-none fixed bottom-5 right-4 z-50 flex flex-col items-end gap-3 md:bottom-6 md:right-6">
+    <div className="pointer-events-none fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))] right-3 z-50 flex flex-col items-end gap-3 md:bottom-6 md:right-6">
       {open ? <div className="pointer-events-auto animate-fade-up">{panel}</div> : null}
       <button
         type="button"

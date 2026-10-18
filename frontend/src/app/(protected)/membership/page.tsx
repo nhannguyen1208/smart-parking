@@ -3,6 +3,7 @@
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
+import { MobileAppHeader } from "@/components/layout/mobile-app-header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useMembership } from "@/context/membership-context";
@@ -93,8 +94,9 @@ function MembershipPageBody() {
 
   return (
     <DashboardShell>
-      <div className="space-y-6">
-        <header>
+      <div className="app-page space-y-4 md:space-y-6">
+        <MobileAppHeader title="Membership" subtitle="Plans & renewals" />
+        <header className="hidden md:block">
           <h1 className="text-[30px] font-semibold text-navy">Membership</h1>
           <p className="mt-2 text-sm text-muted">
             Manage your campus parking membership and renewal options.

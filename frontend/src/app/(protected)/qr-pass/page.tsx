@@ -4,6 +4,7 @@ import Link from "next/link";
 import QRCode from "qrcode";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
+import { MobileAppHeader } from "@/components/layout/mobile-app-header";
 import { api, ApiError } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -148,8 +149,12 @@ export default function QrPassPage() {
 
   return (
     <DashboardShell>
-      <div className="mx-auto max-w-lg space-y-4 pb-8">
-        <div>
+      <div className="app-page mx-auto max-w-lg space-y-4 pb-4">
+        <MobileAppHeader
+          title="Backup Pass"
+          subtitle="QR when you forget your RFID"
+        />
+        <div className="hidden md:block">
           <h1 className="text-2xl font-semibold text-navy">Backup Pass</h1>
           <p className="mt-1 text-sm text-muted">
             Your backup QR when you lose or forget your RFID card. Refreshes
@@ -158,6 +163,10 @@ export default function QrPassPage() {
             <strong>30,000 VND/month</strong>.
           </p>
         </div>
+        <p className="text-sm text-muted md:hidden">
+          Refreshes every {REFRESH_SECONDS}s · counts for Rewards. Needs an
+          active plan.
+        </p>
 
         {membershipLoaded && !hasActivePlan ? (
           <Card className="space-y-3 border border-[#fecaca] bg-[#fef2f2] p-4">
@@ -204,7 +213,7 @@ export default function QrPassPage() {
               </p>
             </div>
 
-            <div className="mx-auto flex h-64 w-64 items-center justify-center rounded-2xl bg-white p-3 shadow-sm ring-1 ring-border">
+            <div className="mx-auto flex aspect-square w-full max-w-[280px] items-center justify-center rounded-2xl bg-white p-3 shadow-sm ring-1 ring-border">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={pass.qrDataUrl}

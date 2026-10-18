@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { Providers } from "@/components/providers";
 import "./globals.css";
@@ -9,8 +9,37 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "ParkEase – Smart Campus Parking",
-  description: "VN-UK smart campus parking experience",
+  title: {
+    default: "ParkWise — VNUK Campus Parking",
+    template: "%s · ParkWise",
+  },
+  description:
+    "VNUK ParkWise — campus parking, Backup Pass, membership, and Early Arrival rewards.",
+  applicationName: "ParkWise",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "ParkWise",
+    statusBarStyle: "default",
+  },
+  icons: {
+    icon: [{ url: "/icons/icon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/icons/icon.svg" }],
+  },
+  formatDetection: {
+    telephone: false,
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#0b2e59" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b2e59" },
+  ],
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

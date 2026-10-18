@@ -1,0 +1,26 @@
+{
+  "name": "VNUK ParkWise",
+  "short_name": "ParkWise",
+  "description": "Campus smart parking for VNUK students — RFID, Backup Pass, and rewards.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f3f5fa",
+  "theme_color": "#0b2e59",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

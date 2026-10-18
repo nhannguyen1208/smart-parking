@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
+import { MobileAppHeader } from "@/components/layout/mobile-app-header";
 import { Card } from "@/components/ui/card";
 import { api, ApiError } from "@/lib/api-client";
 import { peakHours } from "@/lib/mock-data";
@@ -42,8 +43,10 @@ export default function ParkingPage() {
 
   return (
     <DashboardShell>
-      <div className="space-y-6">
-        <header>
+      <div className="app-page space-y-4 md:space-y-6">
+        <MobileAppHeader title="Parking" subtitle="Live campus occupancy" />
+
+        <header className="hidden md:block">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-blue">
             Live campus
           </p>
@@ -55,24 +58,24 @@ export default function ParkingPage() {
           </p>
         </header>
 
-        <div className="grid gap-4 md:grid-cols-2">
-          <Card className="p-6">
+        <div className="grid gap-3 md:grid-cols-2 md:gap-4">
+          <Card className="p-4 md:p-6">
             <p className="text-sm text-muted">Current occupancy</p>
-            <p className="mt-3 text-5xl font-semibold tracking-tight text-navy">
+            <p className="mt-2 text-4xl font-semibold tracking-tight text-navy md:mt-3 md:text-5xl">
               {summary.occupancy}%
             </p>
             <p className="mt-2 text-sm text-muted">{summary.occupancyLabel}</p>
-            <div className="mt-6 h-2.5 overflow-hidden rounded-full bg-surface">
+            <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-surface md:mt-6">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-brand-blue to-[#3b82c4]"
+                className="h-full rounded-full bg-brand-blue"
                 style={{ width: `${summary.occupancy}%` }}
               />
             </div>
           </Card>
 
-          <Card className="p-6">
+          <Card className="p-4 md:p-6">
             <p className="text-sm text-muted">Available spaces</p>
-            <p className="mt-3 text-5xl font-semibold tracking-tight text-navy">
+            <p className="mt-2 text-4xl font-semibold tracking-tight text-navy md:mt-3 md:text-5xl">
               {summary.totalAvailable}
             </p>
             <p className="mt-2 text-sm text-muted">

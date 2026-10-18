@@ -14,6 +14,7 @@ import {
   RewardsToast,
 } from "@/components/rewards";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
+import { MobileAppHeader } from "@/components/layout/mobile-app-header";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/auth-context";
 import { api, ApiError } from "@/lib/api-client";
@@ -171,8 +172,10 @@ export default function RewardsPage() {
 
   return (
     <DashboardShell>
-      <div className="mx-auto max-w-5xl space-y-6 pb-4">
-        <header className="animate-fade-up">
+      <div className="app-page mx-auto max-w-5xl space-y-4 md:space-y-6 pb-2">
+        <MobileAppHeader title="Rewards" subtitle="Earn & redeem free parking" />
+
+        <header className="hidden animate-fade-up md:block">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-blue">
             Rewards
           </p>
