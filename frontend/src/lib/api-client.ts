@@ -51,7 +51,7 @@ export async function apiRequest<T>(
     throw new ApiError("REQUEST_FAILED", "Unexpected API response");
   }
 
-  return body.data;
+  return (body as { data: T }).data;
 }
 
 export const api = {
