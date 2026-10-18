@@ -41,7 +41,7 @@ export function Sidebar() {
       <div>
         <VNUKWordmark />
         <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
-          ParkWise · Silent Gate
+          ParkWise
         </p>
       </div>
 

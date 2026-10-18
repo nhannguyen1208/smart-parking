@@ -96,9 +96,6 @@ export default function MembershipPlansContent() {
       <div className="mx-auto max-w-3xl space-y-6">
         <header>
           <h1 className="text-[30px] font-semibold text-navy">Plan details</h1>
-          <p className="mt-2 text-sm text-muted">
-            Review your selected membership before payment.
-          </p>
         </header>
 
         <Card className="p-6">

@@ -69,11 +69,9 @@ export function RewardCard({ item, busy = false, onRedeem }: RewardCardProps) {
           value={item.progressPct}
           label={`Progress toward ${item.name}`}
         />
-        <p className="mt-2 text-xs leading-relaxed text-muted">
-          {item.canRedeem
-            ? "You can redeem this reward now."
-            : `Earn ${item.pointsToNext} more points to unlock this reward.`}
-        </p>
+        {!item.canRedeem ? (
+          <p className="mt-2 text-xs text-muted">{item.pointsToNext} pts left</p>
+        ) : null}
       </div>
 
       <div className="mt-auto pt-4">

@@ -37,16 +37,9 @@ export default function HelpPage() {
     <DashboardShell>
       <div className="space-y-6">
         <header className="animate-fade-up">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-blue">
-            Support
-          </p>
-          <h1 className="mt-2 text-[30px] font-semibold tracking-tight text-navy md:text-[34px]">
-            Help & Campus SOS
+          <h1 className="text-[30px] font-semibold tracking-tight text-navy md:text-[34px]">
+            Help & SOS
           </h1>
-          <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
-            Ask ParkWise Assist about plans and passes, or submit an SOS for campus
-            assistance. Demo SOS stays OPEN until a guard accepts.
-          </p>
         </header>
 
         <div className="grid gap-6 lg:grid-cols-2">

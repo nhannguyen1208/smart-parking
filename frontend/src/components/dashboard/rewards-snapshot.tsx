@@ -66,13 +66,13 @@ export function RewardsSnapshot() {
               <p className="mt-1 text-4xl font-semibold tabular-nums tracking-tight text-navy">
                 {data.points}
               </p>
-              <p className="mt-1 text-sm text-muted">
-                {next
-                  ? next.pointsToNext === 0
-                    ? "Ready for your next free parking reward"
-                    : `${next.pointsToNext} points to ${next.benefitDays} free parking days`
-                  : "Earn points with today’s challenge"}
-              </p>
+              {next ? (
+                <p className="mt-1 text-sm text-muted">
+                  {next.pointsToNext === 0
+                    ? "Ready to redeem"
+                    : `${next.pointsToNext} pts to ${next.benefitDays} free days`}
+                </p>
+              ) : null}
             </div>
             <Link
               href="/rewards"
@@ -124,10 +124,7 @@ export function RewardsSnapshot() {
           ) : (
             <>
               <p className="text-sm font-semibold text-white">Today&apos;s mission</p>
-              <p className="mt-2 text-sm text-white/80">
-                No active challenge right now. Open Rewards to browse free parking
-                passes.
-              </p>
+              <p className="mt-2 text-sm text-white/80">No active challenge</p>
               <Button
                 href="/rewards"
                 variant="secondary"

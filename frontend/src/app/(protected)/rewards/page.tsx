@@ -155,7 +155,7 @@ export default function RewardsPage() {
       <DashboardShell>
         <EmptyState
           title="Rewards unavailable"
-          description={error ?? "Please refresh the page or try again later."}
+          description={error ?? "Could not load rewards."}
           action={
             <Button type="button" variant="secondary" onClick={() => void load()}>
               Try again
@@ -166,26 +166,17 @@ export default function RewardsPage() {
     );
   }
 
-  const greeting = user?.name
-    ? timeOfDayGreeting(user.name)
-    : "Ready for a smoother parking day?";
+  const greeting = user?.name ? timeOfDayGreeting(user.name) : "Rewards";
 
   return (
     <DashboardShell>
       <div className="app-page mx-auto max-w-5xl space-y-4 md:space-y-6 pb-2">
-        <MobileAppHeader title="Rewards" subtitle="Earn & redeem free parking" />
+        <MobileAppHeader title="Rewards" />
 
         <header className="hidden animate-fade-up md:block">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-blue">
-            Rewards
-          </p>
-          <h1 className="mt-2 text-[28px] font-semibold tracking-tight text-navy sm:text-[32px]">
+          <h1 className="text-[28px] font-semibold tracking-tight text-navy sm:text-[32px]">
             {greeting}
           </h1>
-          <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
-            Earn points with today’s Early Arrival Challenge, then redeem free
-            parking days. Check in as usual — RFID, plate, or Backup Pass.
-          </p>
         </header>
 
         {toast ? (
@@ -243,7 +234,7 @@ export default function RewardsPage() {
           {data.catalog.length === 0 ? (
             <EmptyState
               title="No rewards in the catalog"
-              description="Check back soon — new free parking rewards will show up here."
+              description="No rewards available."
             />
           ) : (
             <div className="grid gap-4 sm:grid-cols-2">

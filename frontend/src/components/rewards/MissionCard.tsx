@@ -106,7 +106,7 @@ export function MissionCard({
             </div>
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/75">
-                Today&apos;s mission · earn points
+                Today&apos;s mission
               </p>
               <h2 className="mt-1.5 text-[22px] font-semibold tracking-tight text-white sm:text-2xl">
                 {mission.name}
@@ -159,26 +159,17 @@ export function MissionCard({
         >
           {mission.message}
         </p>
-        <p className="text-xs leading-relaxed text-muted">
-          Points are added automatically when you check in during the window — no
-          claim button needed.
-        </p>
 
         {showDemoSimulate && onSimulate ? (
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <Button
-              type="button"
-              variant="secondary"
-              disabled={busy}
-              onClick={onSimulate}
-              className="h-11 w-full border-brand-blue/25 sm:w-auto"
-            >
-              {busy ? "Simulating…" : "DEMO: Simulate early check-in"}
-            </Button>
-            <p className="text-xs text-muted">
-              Labeled simulator — not a physical RFID scan
-            </p>
-          </div>
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={busy}
+            onClick={onSimulate}
+            className="h-11 w-full border-brand-blue/25 sm:w-auto"
+          >
+            {busy ? "Simulating…" : "DEMO: Simulate early check-in"}
+          </Button>
         ) : null}
       </div>
     </Card>

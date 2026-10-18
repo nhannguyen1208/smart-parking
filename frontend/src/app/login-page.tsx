@@ -74,24 +74,21 @@ export default function LoginPage() {
             <div className="relative">
               <VNUKWordmark size="lg" onDark />
               <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-white/70">
-                VNUK ParkWise · The Silent Gate
+                VNUK ParkWise
               </p>
             </div>
 
             <div className="relative max-w-[480px]">
               <h1 className="text-[34px] font-semibold leading-[1.15] tracking-tight text-white md:text-[42px]">
-                Campus parking for students, guards, and admins.
+                Campus parking
               </h1>
-              <p className="mt-5 max-w-[420px] text-base leading-relaxed text-white/80">
-                RFID sessions · lot capacity estimates · Backup Pass · DEMO adapters
-              </p>
             </div>
 
             <div className="relative grid gap-3 sm:grid-cols-3">
               {[
-                { label: "Live zones", value: "A · B · C" },
+                { label: "Zones", value: "A · B · C" },
                 { label: "Access", value: "RFID + QR" },
-                { label: "Students", value: "Always on" },
+                { label: "Roles", value: "Student · Guard · Admin" },
               ].map((item) => (
                 <div
                   key={item.label}
@@ -114,9 +111,6 @@ export default function LoginPage() {
               <h2 className="mt-2 text-[30px] font-semibold tracking-tight text-navy md:text-[34px]">
                 Sign in
               </h2>
-              <p className="mt-3 text-sm leading-relaxed text-muted">
-                Local demo accounts only — not production credentials.
-              </p>
 
               <form
                 className="relative z-20 mt-8 flex flex-col gap-4"

@@ -12,9 +12,7 @@ export function RewardProgress({ points, nextReward }: RewardProgressProps) {
     return (
       <Card className="flex h-full flex-col justify-center p-5 sm:p-6">
         <p className="text-sm font-medium text-muted">Your next reward</p>
-        <p className="mt-2 text-sm text-muted">
-          Rewards will appear here when the catalog is available.
-        </p>
+        <p className="mt-2 text-sm text-muted">No rewards available</p>
       </Card>
     );
   }
@@ -44,11 +42,9 @@ export function RewardProgress({ points, nextReward }: RewardProgressProps) {
           label={`Progress toward ${nextReward.name}`}
           barClassName={ready ? "bg-brand-red" : "bg-brand-blue"}
         />
-        <p className="mt-3 text-sm leading-relaxed text-muted">
-          {ready
-            ? "You have enough points — redeem below when you’re ready."
-            : "You're getting closer! Keep checking in during the challenge window."}
-        </p>
+        {ready ? (
+          <p className="mt-3 text-sm text-muted">Ready to redeem below.</p>
+        ) : null}
       </div>
     </Card>
   );

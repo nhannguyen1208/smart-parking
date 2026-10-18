@@ -7,13 +7,10 @@ export default function HistoryPage() {
   return (
     <DashboardShell>
       <div className="app-page space-y-4 md:space-y-6">
-        <MobileAppHeader title="History" subtitle="Entry & exit records" />
+        <MobileAppHeader title="History" />
 
         <header className="hidden md:block">
-          <h1 className="text-[30px] font-semibold text-navy">Parking History</h1>
-          <p className="mt-2 text-sm text-muted">
-            Automatic entry and exit records from the campus parking system.
-          </p>
+          <h1 className="text-[30px] font-semibold text-navy">History</h1>
         </header>
 
         {/* Mobile list */}
@@ -28,7 +25,6 @@ export default function HistoryPage() {
                   <p className="mt-0.5 text-xs text-muted">
                     {item.date} · {item.time}
                   </p>
-                  <p className="mt-0.5 text-xs text-muted">Main campus gate</p>
                 </div>
                 <span
                   className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
@@ -60,7 +56,7 @@ export default function HistoryPage() {
               <span className="text-navy">{item.date}</span>
               <span className="text-navy">{item.time}</span>
               <span className="capitalize text-muted">{item.event}</span>
-              <span className="text-muted">Main campus gate</span>
+              <span className="text-muted">Gate</span>
             </div>
           ))}
         </Card>

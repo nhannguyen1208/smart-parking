@@ -73,16 +73,9 @@ export default function DashboardPage() {
 
         {/* Desktop header */}
         <header className="hidden animate-fade-up md:block">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-blue">
-            Dashboard
-          </p>
-          <h1 className="mt-2 text-[30px] font-semibold tracking-tight text-navy md:text-[34px]">
+          <h1 className="text-[30px] font-semibold tracking-tight text-navy md:text-[34px]">
             {timeOfDayGreeting(user.name)}
           </h1>
-          <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
-            Ready for a smoother parking day? Here’s your membership, lot status,
-            and today’s rewards.
-          </p>
         </header>
 
         {/* Primary: parking status */}
@@ -117,36 +110,18 @@ export default function DashboardPage() {
               />
             </div>
           </div>
-          <div className="space-y-3 px-4 py-4 sm:px-5">
-            <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
-              <div>
-                <p className="text-xs text-muted">Your vehicle</p>
-                <p className="font-semibold text-navy">
-                  {user.vehicleNumber || "Not registered"}
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-xs text-muted">Membership</p>
-                <p className="font-semibold text-navy">
-                  {activeMembership
-                    ? `${activeMembership.planName ?? activeMembership.status}`
-                    : "No plan"}
-                </p>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <Button href="/qr-pass" className="h-11 w-full gap-2 px-3 text-sm">
-                <QrCode className="h-4 w-4" aria-hidden />
-                Backup Pass
-              </Button>
-              <Button
-                href="/parking"
-                variant="secondary"
-                className="h-11 w-full px-3 text-sm"
-              >
-                Lot details
-              </Button>
-            </div>
+          <div className="grid grid-cols-2 gap-2 px-4 py-4 sm:px-5">
+            <Button href="/qr-pass" className="h-11 w-full gap-2 px-3 text-sm">
+              <QrCode className="h-4 w-4" aria-hidden />
+              Backup Pass
+            </Button>
+            <Button
+              href="/parking"
+              variant="secondary"
+              className="h-11 w-full px-3 text-sm"
+            >
+              Lot details
+            </Button>
           </div>
         </Card>
 
@@ -221,12 +196,7 @@ export default function DashboardPage() {
                 href={action.href}
                 className="flex min-h-[96px] flex-col justify-between rounded-[14px] border border-border/80 bg-white p-3.5 shadow-[var(--shadow-card)] transition active:scale-[0.98] md:min-h-[140px] md:p-5"
               >
-                <div>
-                  <p className="text-sm font-semibold text-navy">{action.title}</p>
-                  <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted md:text-sm">
-                    {action.description}
-                  </p>
-                </div>
+                <p className="text-sm font-semibold text-navy">{action.title}</p>
                 <span className="mt-3 text-xs font-semibold text-brand-blue">
                   {action.actionLabel}
                 </span>
@@ -239,7 +209,6 @@ export default function DashboardPage() {
               <div>
                 <Ticket className="mb-1 h-4 w-4 text-brand-blue" aria-hidden />
                 <p className="text-sm font-semibold text-navy">Membership</p>
-                <p className="mt-1 text-xs text-muted">Plans & billing</p>
               </div>
               <span className="mt-3 text-xs font-semibold text-brand-blue">
                 Manage

@@ -44,18 +44,12 @@ export default function ParkingPage() {
   return (
     <DashboardShell>
       <div className="app-page space-y-4 md:space-y-6">
-        <MobileAppHeader title="Parking" subtitle="Live campus occupancy" />
+        <MobileAppHeader title="Parking" />
 
         <header className="hidden md:block">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-blue">
-            Live campus
-          </p>
-          <h1 className="mt-2 text-[30px] font-semibold tracking-tight text-navy md:text-[34px]">
-            Parking Status
+          <h1 className="text-[30px] font-semibold tracking-tight text-navy md:text-[34px]">
+            Parking
           </h1>
-          <p className="mt-2 text-sm leading-relaxed text-muted">
-            Real-time occupancy and peak hour insights for campus parking.
-          </p>
         </header>
 
         <div className="grid gap-3 md:grid-cols-2 md:gap-4">
@@ -83,7 +77,7 @@ export default function ParkingPage() {
             </p>
             {summary.occupancy >= 90 && (
               <p className="mt-6 rounded-[12px] border border-[#fecaca] bg-[#fef2f2] px-3 py-2 text-sm text-[#b91c1c]">
-                Parking is nearly full. Consider alternative arrival times.
+                Nearly full
               </p>
             )}
           </Card>

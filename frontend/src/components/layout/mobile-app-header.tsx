@@ -23,12 +23,7 @@ export function MobileAppHeader({
   return (
     <header className="mb-4 flex items-center justify-between gap-3 md:hidden">
       <div className="min-w-0">
-        <div className="flex items-center gap-2">
-          <VNUKWordmark size="sm" />
-          <span className="truncate text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
-            ParkWise
-          </span>
-        </div>
+        <VNUKWordmark size="sm" />
         {showGreeting ? (
           <p className="mt-2 truncate text-lg font-semibold tracking-tight text-navy">
             Hi, {name}

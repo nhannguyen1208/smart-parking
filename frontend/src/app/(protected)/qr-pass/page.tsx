@@ -150,23 +150,10 @@ export default function QrPassPage() {
   return (
     <DashboardShell>
       <div className="app-page mx-auto max-w-lg space-y-4 pb-4">
-        <MobileAppHeader
-          title="Backup Pass"
-          subtitle="QR when you forget your RFID"
-        />
+        <MobileAppHeader title="Backup Pass" />
         <div className="hidden md:block">
           <h1 className="text-2xl font-semibold text-navy">Backup Pass</h1>
-          <p className="mt-1 text-sm text-muted">
-            Your backup QR when you lose or forget your RFID card. Refreshes
-            every <strong>{REFRESH_SECONDS}s</strong> · counts for Rewards.
-            Requires <strong>10,000 VND/day</strong> or{" "}
-            <strong>30,000 VND/month</strong>.
-          </p>
         </div>
-        <p className="text-sm text-muted md:hidden">
-          Refreshes every {REFRESH_SECONDS}s · counts for Rewards. Needs an
-          active plan.
-        </p>
 
         {membershipLoaded && !hasActivePlan ? (
           <Card className="space-y-3 border border-[#fecaca] bg-[#fef2f2] p-4">

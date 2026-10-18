@@ -93,25 +93,19 @@ export default function ProfilePage() {
   return (
     <DashboardShell>
       <div className="app-page mx-auto max-w-2xl space-y-5 md:space-y-8 pb-4">
-        <MobileAppHeader title="Profile" subtitle="ID, membership & access" />
+        <MobileAppHeader title="Profile" />
 
         <header className="hidden md:block">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-red">
-            Digital ID
-          </p>
-          <h1 className="mt-1 text-[28px] font-semibold tracking-tight text-navy">
-            Thẻ sinh viên VNUK
+          <h1 className="text-[28px] font-semibold tracking-tight text-navy">
+            Profile
           </h1>
-          <p className="mt-1 text-sm text-muted">
-            University of Danang — VN-UK Institute for Research and Executive Education
-          </p>
         </header>
 
         <Card className="divide-y divide-border overflow-hidden p-0 md:hidden">
           {[
-            { href: "/membership", label: "Membership", hint: "Plans & renew", icon: CreditCard },
-            { href: "/qr-pass", label: "Backup Pass", hint: "QR when you forget your card", icon: QrCode },
-            { href: "/help", label: "Help / SOS", hint: "Campus assistance", icon: HelpCircle },
+            { href: "/membership", label: "Membership", icon: CreditCard },
+            { href: "/qr-pass", label: "Backup Pass", icon: QrCode },
+            { href: "/help", label: "Help / SOS", icon: HelpCircle },
           ].map((item) => {
             const Icon = item.icon;
             return (
@@ -123,11 +117,8 @@ export default function ProfilePage() {
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-light/70 text-brand-blue">
                   <Icon className="h-4 w-4" aria-hidden />
                 </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-semibold text-navy">
-                    {item.label}
-                  </span>
-                  <span className="block text-xs text-muted">{item.hint}</span>
+                <span className="min-w-0 flex-1 text-sm font-semibold text-navy">
+                  {item.label}
                 </span>
                 <ChevronRight className="h-4 w-4 text-muted" aria-hidden />
               </Link>

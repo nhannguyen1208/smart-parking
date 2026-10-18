@@ -48,24 +48,20 @@ export function PointsBalance({
           ) : null}
         </div>
 
-        <p className="mt-3 text-sm text-muted">
-          {pointsEarnedToday > 0 ? (
-            <>
-              Earned today:{" "}
-              <span className="font-semibold text-navy">+{pointsEarnedToday}</span>
-            </>
-          ) : (
-            "No points earned yet today — try today’s challenge."
-          )}
-        </p>
+        {pointsEarnedToday > 0 ? (
+          <p className="mt-3 text-sm text-muted">
+            Today{" "}
+            <span className="font-semibold text-navy">+{pointsEarnedToday}</span>
+          </p>
+        ) : null}
 
         {hasNext ? (
           <div className="mt-5">
             <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2 text-sm">
               <p className="font-medium text-navy">
                 {pointsToNext === 0
-                  ? "Ready to redeem your next reward"
-                  : `${pointsToNext} points to your next reward`}
+                  ? "Ready to redeem"
+                  : `${pointsToNext} pts to next reward`}
               </p>
               <p className="tabular-nums text-xs text-muted">
                 {points} / {nextPointsCost}
@@ -75,7 +71,6 @@ export function PointsBalance({
               value={progressPct ?? 0}
               label={`Progress toward ${nextRewardName}: ${progressPct ?? 0}%`}
             />
-            <p className="mt-2 text-xs text-muted">Next up: {nextRewardName}</p>
           </div>
         ) : null}
       </div>

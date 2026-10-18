@@ -95,12 +95,9 @@ function MembershipPageBody() {
   return (
     <DashboardShell>
       <div className="app-page space-y-4 md:space-y-6">
-        <MobileAppHeader title="Membership" subtitle="Plans & renewals" />
+        <MobileAppHeader title="Membership" />
         <header className="hidden md:block">
           <h1 className="text-[30px] font-semibold text-navy">Membership</h1>
-          <p className="mt-2 text-sm text-muted">
-            Manage your campus parking membership and renewal options.
-          </p>
         </header>
 
         {justActivated ? (
