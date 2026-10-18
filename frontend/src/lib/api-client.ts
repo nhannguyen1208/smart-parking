@@ -1,3 +1,4 @@
+import { getAuthToken, setAuthToken } from "./auth-token";
 import type { ApiErrorBody } from "./types";
 
 export class ApiError extends Error {
@@ -30,6 +31,12 @@ export async function apiRequest<T>(
     headers.set("Content-Type", "application/json");
   }
 
+  // Bearer works across Vercel ↔ tunnel (3rd-party cookies often blocked)
+  const token = getAuthToken();
+  if (token && !headers.has("Authorization")) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+
   const response = await fetch(`${getApiUrl()}${path}`, {
     ...options,
     headers,
@@ -41,6 +48,12 @@ export async function apiRequest<T>(
 
   if (!response.ok || ("error" in body && !("data" in body))) {
     const errorBody = body as ApiErrorBody;
+    if (
+      errorBody.error === "UNAUTHORIZED" ||
+      errorBody.error === "EXPIRED_TOKEN"
+    ) {
+      setAuthToken(null);
+    }
     throw new ApiError(
       errorBody.error ?? "REQUEST_FAILED",
       errorBody.message ?? "Request failed",
@@ -51,17 +64,35 @@ export async function apiRequest<T>(
     throw new ApiError("REQUEST_FAILED", "Unexpected API response");
   }
 
-  return body.data;
+  return (body as { data: T }).data;
 }
 
 export const api = {
-  login: (payload: { studentId?: string; email?: string; password: string }) =>
-    apiRequest<{ user: import("./types").User; token: string }>("/api/auth/login", {
+  login: async (payload: {
+    studentId?: string;
+    email?: string;
+    password: string;
+  }) => {
+    const data = await apiRequest<{
+      user: import("./types").User;
+      token: string;
+    }>("/api/auth/login", {
       method: "POST",
       body: JSON.stringify(payload),
-    }),
+    });
+    if (data.token) setAuthToken(data.token);
+    return data;
+  },
   me: () => apiRequest<{ user: import("./types").User }>("/api/auth/me"),
-  logout: () => apiRequest<{ success: boolean }>("/api/auth/logout", { method: "POST" }),
+  logout: async () => {
+    try {
+      return await apiRequest<{ success: boolean }>("/api/auth/logout", {
+        method: "POST",
+      });
+    } finally {
+      setAuthToken(null);
+    }
+  },
   dashboard: () => apiRequest<import("./types").DashboardData>("/api/dashboard"),
   profile: () => apiRequest<import("./types").ProfileData>("/api/profile"),
   updateProfile: (payload: {

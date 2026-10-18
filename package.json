@@ -2,35 +2,29 @@
   "name": "smart-parking",
   "version": "0.1.0",
   "private": true,
+  "description": "VNUK ParkWise monorepo — frontend/ (Next.js) + backend/ (Express API)",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint",
-    "dev:server": "npm run dev --prefix server",
-    "seed": "npm run seed --prefix server",
-    "test:api": "npm run test --prefix server",
+    "dev": "npm run dev --prefix frontend",
+    "build": "npm run build --prefix frontend",
+    "start": "npm run start --prefix frontend",
+    "lint": "npm run lint --prefix frontend",
+    "typecheck": "npm run typecheck --prefix frontend",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev:backend": "npm run dev --prefix backend",
+    "seed": "npm run seed --prefix backend",
+    "test": "npm run test --prefix backend",
+    "test:api": "npm run test:api --prefix backend",
+    "infra:up": "docker compose -f infra/docker-compose.yml up -d",
     "db:ui": "node scripts/db-ui.mjs",
-    "parkwise:backend": "npm run dev --prefix backend",
-    "parkwise:app": "npm run dev --prefix zalo-miniapp",
-    "parkwise:rfid": "npm run simulate:rfid --prefix backend",
-    "parkwise:db": "npm run db:studio --prefix backend",
-    "parkwise:seed": "npm run db:seed --prefix backend"
-  },
-  "dependencies": {
-    "next": "16.3.2",
-    "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "parkwise:sqlite": "npm run dev --prefix backend/parkwise-sqlite",
+    "parkwise:app": "npm run dev --prefix frontend/zalo-miniapp",
+    "parkwise:zalo": "node scripts/parkwise-zalo.mjs",
+    "parkwise:zalo:deploy": "npm run zmp:deploy --prefix frontend/zalo-miniapp",
+    "parkwise:rfid": "npm run simulate:rfid --prefix backend/parkwise-sqlite",
+    "parkwise:db": "npm run db:studio --prefix backend/parkwise-sqlite",
+    "parkwise:seed": "npm run db:seed --prefix backend/parkwise-sqlite"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.3.2",
-    "mongodb": "^7.7.0",
-    "tailwindcss": "^4",
-    "typescript": "^5"
+    "mongodb": "^7.7.0"
   }
 }
