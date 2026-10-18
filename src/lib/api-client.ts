@@ -46,7 +46,7 @@ export async function apiRequest<T>(
     );
   }
 
-  return body.data;
+  return (body as { data: T }).data;
 }
 
 export const api = {
