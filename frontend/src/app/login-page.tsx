@@ -2,7 +2,6 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AccentBar } from "@/components/layout/accent-bar";
 import { VNUKWordmark } from "@/components/layout/vnuk-wordmark";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,107 +49,94 @@ export default function LoginPage() {
 
   if (loading) {
     return (
-      <div className="page-atmosphere flex min-h-screen items-center justify-center text-sm text-muted">
-        Loading session...
+      <div className="flex min-h-dvh items-center justify-center bg-[#0b2e59] text-sm text-white/70">
+        Loading…
       </div>
     );
   }
 
   return (
-    <div className="page-atmosphere min-h-screen overflow-hidden">
-      <AccentBar />
-      <div className="relative mx-auto flex min-h-[calc(100vh-5px)] max-w-[1440px] items-center px-5 py-8 md:px-10 md:py-10">
-        <div className="pointer-events-none absolute -left-20 top-24 h-72 w-72 rounded-full bg-brand-blue/15 blur-3xl brand-glow" />
-        <div className="pointer-events-none absolute right-0 bottom-10 h-80 w-80 rounded-full bg-brand-red/10 blur-3xl" />
+    <div className="relative flex min-h-dvh flex-col overflow-hidden bg-[#0b2e59] text-white md:grid md:grid-cols-2">
+      {/* Full-bleed atmosphere */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        aria-hidden
+        style={{
+          background:
+            "radial-gradient(90% 55% at 50% -10%, rgba(0,93,170,0.95), transparent 60%), radial-gradient(70% 45% at 100% 30%, rgba(137,22,53,0.35), transparent 55%), linear-gradient(165deg, #005daa 0%, #0b2e59 48%, #081f3d 100%)",
+        }}
+      />
+      <div
+        className="brand-glow pointer-events-none absolute -left-16 top-24 h-56 w-56 rounded-full bg-white/10 blur-3xl"
+        aria-hidden
+      />
+      <div
+        className="pointer-events-none absolute right-0 top-1/3 h-64 w-64 rounded-full bg-[#891635]/20 blur-3xl md:left-1/4 md:top-auto md:bottom-10"
+        aria-hidden
+      />
 
-        <div className="relative z-10 grid w-full items-stretch gap-8 lg:grid-cols-[1.05fr_0.95fr]">
-          <section className="animate-fade-up relative flex min-h-[520px] flex-col justify-between overflow-hidden rounded-[24px] bg-gradient-to-br from-[#005daa] via-[#0b4f8a] to-[#0b2e59] p-10 text-brand-light shadow-[0_24px_60px_rgba(11,46,89,0.28)] md:min-h-[720px] md:p-14">
-            <div className="absolute inset-0 opacity-30">
-              <div className="absolute left-10 top-40 h-40 w-40 rounded-full border border-white/20" />
-              <div className="absolute right-16 top-24 h-24 w-24 rounded-full border border-white/15" />
-              <div className="absolute bottom-28 left-1/3 h-56 w-56 rounded-full bg-white/5 blur-2xl" />
-            </div>
-
-            <div className="relative">
-              <VNUKWordmark size="lg" onDark />
-              <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-white/70">
-                VNUK ParkWise
-              </p>
-            </div>
-
-            <div className="relative max-w-[480px]">
-              <h1 className="text-[34px] font-semibold leading-[1.15] tracking-tight text-white md:text-[42px]">
-                Campus parking
-              </h1>
-            </div>
-
-            <div className="relative grid gap-3 sm:grid-cols-3">
-              {[
-                { label: "Zones", value: "A · B · C" },
-                { label: "Access", value: "RFID + QR" },
-                { label: "Roles", value: "Student · Guard · Admin" },
-              ].map((item) => (
-                <div
-                  key={item.label}
-                  className="rounded-[14px] border border-white/15 bg-white/10 px-4 py-3 backdrop-blur-sm"
-                >
-                  <p className="text-[11px] uppercase tracking-wide text-white/65">
-                    {item.label}
-                  </p>
-                  <p className="mt-1 text-sm font-semibold text-white">{item.value}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section className="animate-fade-up-delay-1 relative z-20 flex items-center">
-            <div className="relative z-20 w-full rounded-[24px] border border-border/80 bg-white p-7 shadow-[var(--shadow-soft)] md:p-10">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-red">
-                Welcome back
-              </p>
-              <h2 className="mt-2 text-[30px] font-semibold tracking-tight text-navy md:text-[34px]">
-                Sign in
-              </h2>
-
-              <form
-                className="relative z-20 mt-8 flex flex-col gap-4"
-                onSubmit={handleSubmit}
-                autoComplete="on"
-              >
-                <Input
-                  label="Student ID or email"
-                  value={identifier}
-                  onChange={(event) => setIdentifier(event.target.value)}
-                  name="identifier"
-                  autoComplete="username"
-                  required
-                />
-                <Input
-                  label="Password"
-                  type="password"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  name="password"
-                  autoComplete="current-password"
-                  required
-                  placeholder="Enter password"
-                />
-                {error && (
-                  <p className="rounded-[12px] border border-[#fecaca] bg-[#fef2f2] px-3 py-2.5 text-sm text-[#b91c1c]">
-                    {error}
-                  </p>
-                )}
-                <Button type="submit" className="mt-1 w-full" disabled={submitting}>
-                  {submitting ? "Signing in..." : "Sign in"}
-                </Button>
-                <p className="text-center text-[11px] leading-relaxed text-muted">
-                  Demo: STU-NHI / G-1001 / A-9001 · password123
-                </p>
-              </form>
-            </div>
-          </section>
+      {/* Brand — mobile top / desktop left */}
+      <header className="animate-fade-up relative z-10 flex flex-1 flex-col justify-end px-6 pb-8 pt-[max(2.75rem,env(safe-area-inset-top))] sm:px-8 md:flex-none md:justify-center md:px-12 md:pb-0 lg:px-16">
+        <div className="w-full max-w-sm md:max-w-md">
+          <VNUKWordmark size="lg" onDark />
+          <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/65">
+            ParkWise
+          </p>
+          <h1 className="mt-3 text-[2.4rem] font-semibold leading-[1.08] tracking-tight sm:text-5xl">
+            Campus parking
+          </h1>
         </div>
-      </div>
+      </header>
+
+      {/* Form sheet — mobile bottom / desktop right */}
+      <section className="animate-fade-up-delay-1 relative z-20 flex w-full items-end md:items-center md:justify-center md:px-8 lg:px-12">
+        <div className="w-full rounded-t-[28px] bg-white px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-7 text-navy shadow-[0_-16px_48px_rgba(0,0,0,0.22)] sm:px-8 md:max-w-[420px] md:rounded-[28px] md:px-9 md:py-9 md:shadow-[0_28px_64px_rgba(8,31,61,0.35)]">
+          <h2 className="text-2xl font-semibold tracking-tight text-navy">
+            Sign in
+          </h2>
+
+          <form
+            className="mt-6 flex flex-col gap-3.5"
+            onSubmit={handleSubmit}
+            autoComplete="on"
+          >
+            <Input
+              label="Student ID or email"
+              value={identifier}
+              onChange={(event) => setIdentifier(event.target.value)}
+              name="identifier"
+              autoComplete="username"
+              required
+              inputMode="email"
+            />
+            <Input
+              label="Password"
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              name="password"
+              autoComplete="current-password"
+              required
+              placeholder="Enter password"
+            />
+            {error ? (
+              <p className="rounded-[12px] border border-[#fecaca] bg-[#fef2f2] px-3 py-2.5 text-sm text-[#b91c1c]">
+                {error}
+              </p>
+            ) : null}
+            <Button
+              type="submit"
+              className="mt-1 h-12 w-full text-[15px]"
+              disabled={submitting}
+            >
+              {submitting ? "Signing in…" : "Sign in"}
+            </Button>
+            <p className="pt-1 text-center text-[11px] text-muted">
+              Demo · STU-NHI · password123
+            </p>
+          </form>
+        </div>
+      </section>
     </div>
   );
 }
