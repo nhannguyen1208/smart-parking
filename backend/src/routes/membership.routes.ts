@@ -1,0 +1,18 @@
+import { Router } from "express";
+import {
+  cancelMembership,
+  getMembership,
+  getMembershipPlans,
+  subscribeMembership,
+} from "../controllers/membership.controller.js";
+import { authenticate } from "../middleware/auth.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+
+const router = Router();
+
+router.get("/", authenticate, asyncHandler(getMembership));
+router.get("/plans", authenticate, asyncHandler(getMembershipPlans));
+router.post("/subscribe", authenticate, asyncHandler(subscribeMembership));
+router.post("/cancel", authenticate, asyncHandler(cancelMembership));
+
+export default router;

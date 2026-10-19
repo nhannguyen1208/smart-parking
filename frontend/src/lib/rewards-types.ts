@@ -1,3 +1,11 @@
+export type BlindPrizePreview = {
+  key: string;
+  name: string;
+  rarity: "common" | "lucky" | "rare" | "epic" | string;
+  benefitDays: number;
+  image?: string;
+};
+
 export type CatalogItem = {
   id: string;
   name: string;
@@ -5,9 +13,20 @@ export type CatalogItem = {
   pointsCost: number;
   benefitDays: number;
   validityDays: number;
+  isBlindBox?: boolean;
+  prizePreview?: BlindPrizePreview[];
   progressPct: number;
   pointsToNext: number;
   canRedeem: boolean;
+};
+
+export type BlindRevealResult = {
+  prize: BlindPrizePreview;
+  prizePreview: BlindPrizePreview[];
+  message: string;
+  points: number;
+  wonDays?: number;
+  isBlindBox?: boolean;
 };
 
 export type Mission = {
@@ -33,10 +52,15 @@ export type HistoryRow = {
 export type RedemptionRow = {
   id: string;
   rewardName: string;
+  prizeImage?: string;
+  prizeKey?: string;
   pointsSpent: number;
+  benefitDaysTotal?: number;
   benefitDaysRemaining: number;
   validUntil: string;
+  validFrom?: string;
   status: string;
+  createdAt?: string;
 };
 
 export type RewardsOverview = {

@@ -1,0 +1,19 @@
+# Development-only MongoDB + Mosquitto for VNUK ParkWise.
+# Change credentials and enable TLS/ACL before any production deployment.
+services:
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - parkwise_mongo:/data/db
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+
+volumes:
+  parkwise_mongo:

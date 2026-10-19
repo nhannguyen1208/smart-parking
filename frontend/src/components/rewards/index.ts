@@ -1,4 +1,6 @@
 export { ActivePasses } from "./ActivePasses";
+export { BlindSpinReveal } from "./BlindSpinReveal";
+export { GiftInventory } from "./GiftInventory";
 export { EmptyState } from "./EmptyState";
 export { LoadingState } from "./LoadingState";
 export { MissionCard } from "./MissionCard";

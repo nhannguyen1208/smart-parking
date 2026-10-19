@@ -3,7 +3,9 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivePasses,
+  BlindSpinReveal,
   EmptyState,
+  GiftInventory,
   LoadingState,
   MissionCard,
   PointsActivityList,
@@ -19,7 +21,11 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/auth-context";
 import { api, ApiError } from "@/lib/api-client";
 import { timeOfDayGreeting } from "@/lib/rewards-format";
-import type { CatalogItem, RewardsOverview } from "@/lib/rewards-types";
+import type {
+  BlindPrizePreview,
+  CatalogItem,
+  RewardsOverview,
+} from "@/lib/rewards-types";
 
 export default function RewardsPage() {
   const { user } = useAuth();
@@ -32,6 +38,11 @@ export default function RewardsPage() {
     tone: "success" | "error" | "info";
   } | null>(null);
   const [redeemTarget, setRedeemTarget] = useState<CatalogItem | null>(null);
+  const [spinReveal, setSpinReveal] = useState<{
+    boxName: string;
+    prize: BlindPrizePreview;
+    pool: BlindPrizePreview[];
+  } | null>(null);
 
   const load = useCallback(async () => {
     setError(null);
@@ -79,10 +90,22 @@ export default function RewardsPage() {
     if (!redeemTarget) return;
     setBusy(true);
     setToast(null);
+    const box = redeemTarget;
     try {
-      const result = await api.v1.redeemReward(redeemTarget.id);
-      setToast({ message: result.message, tone: "success" });
+      const result = await api.v1.redeemReward(box.id);
       setRedeemTarget(null);
+      if (result.isBlindBox && result.prize) {
+        setSpinReveal({
+          boxName: box.name,
+          prize: result.prize,
+          pool:
+            result.prizePreview && result.prizePreview.length > 0
+              ? result.prizePreview
+              : box.prizePreview ?? [result.prize],
+        });
+      } else {
+        setToast({ message: result.message, tone: "success" });
+      }
       await load();
     } catch (err) {
       setToast({
@@ -223,10 +246,10 @@ export default function RewardsPage() {
                 id="rewards-catalog-heading"
                 className="text-lg font-semibold tracking-tight text-navy"
               >
-                Available rewards
+                Blind boxes
               </h2>
               <p className="mt-1 text-sm text-muted">
-                Spend points on free parking days when you’re ready.
+                Spend points to open a box — prizes go into My gifts.
               </p>
             </div>
           </div>
@@ -253,7 +276,10 @@ export default function RewardsPage() {
           )}
         </section>
 
-        <ActivePasses redemptions={data.redemptions} />
+        <div className="animate-fade-up space-y-6">
+          <GiftInventory redemptions={data.redemptions} />
+          <ActivePasses redemptions={data.redemptions} />
+        </div>
 
         <PointsActivityList
           rows={data.history}
@@ -270,6 +296,22 @@ export default function RewardsPage() {
           if (!busy) setRedeemTarget(null);
         }}
         onConfirm={() => void confirmRedeem()}
+      />
+
+      <BlindSpinReveal
+        open={Boolean(spinReveal)}
+        boxName={spinReveal?.boxName ?? ""}
+        prize={spinReveal?.prize ?? null}
+        pool={spinReveal?.pool ?? []}
+        onDone={() => {
+          if (spinReveal) {
+            setToast({
+              message: `You got: ${spinReveal.prize.name}!`,
+              tone: "success",
+            });
+          }
+          setSpinReveal(null);
+        }}
       />
     </DashboardShell>
   );

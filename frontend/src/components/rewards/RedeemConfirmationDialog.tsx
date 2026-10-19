@@ -40,6 +40,8 @@ export function RedeemConfirmationDialog({
 
   if (!open || !item) return null;
 
+  const blind = Boolean(item.isBlindBox);
+
   return (
     <div
       className="fixed inset-0 z-[60] flex items-end justify-center bg-navy/40 p-0 sm:items-center sm:p-4"
@@ -60,18 +62,42 @@ export function RedeemConfirmationDialog({
           aria-hidden
         />
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand-blue">
-          Confirm redemption
+          {blind ? "Open blind box" : "Confirm claim"}
         </p>
         <h2 id={titleId} className="mt-2 text-xl font-semibold text-navy">
-          Redeem {item.name}?
+          {blind ? `Open ${item.name}?` : `Claim ${item.name}?`}
         </h2>
         <div id={descId} className="mt-3 space-y-2 text-sm leading-relaxed text-muted">
-          <p>
-            You&apos;ll spend{" "}
-            <strong className="text-navy">{item.pointsCost} points</strong> for{" "}
-            <strong className="text-navy">{item.benefitDays} free parking days</strong>.
-          </p>
-          <p>Valid for {item.validityDays} days after redemption. Points are deducted right away.</p>
+          {blind ? (
+            <>
+              <p>
+                Spend{" "}
+                <strong className="text-navy">{item.pointsCost} points</strong> to
+                open a mystery box.
+              </p>
+              <p>
+                Prize is random — up to{" "}
+                <strong className="text-navy">{item.benefitDays} free day
+                {item.benefitDays === 1 ? "" : "s"}</strong>. You&apos;ll see the
+                reveal after opening.
+              </p>
+            </>
+          ) : (
+            <>
+              <p>
+                You&apos;ll spend{" "}
+                <strong className="text-navy">{item.pointsCost} points</strong> for{" "}
+                <strong className="text-navy">
+                  {item.benefitDays} free parking days
+                </strong>
+                .
+              </p>
+              <p>
+                Valid for {item.validityDays} days after redemption. Points are
+                deducted right away.
+              </p>
+            </>
+          )}
         </div>
 
         <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
@@ -91,7 +117,7 @@ export function RedeemConfirmationDialog({
             disabled={busy}
             onClick={onConfirm}
           >
-            {busy ? "Redeeming…" : "Confirm redeem"}
+            {busy ? "Opening…" : blind ? "Open box" : "Confirm"}
           </Button>
         </div>
       </div>

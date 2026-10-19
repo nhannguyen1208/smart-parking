@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
+import { ArrowLeft, Check, Wallet } from "lucide-react";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
+import { MobileAppHeader } from "@/components/layout/mobile-app-header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useMembership } from "@/context/membership-context";
@@ -45,7 +47,7 @@ export default function MembershipPlansContent() {
   if (error && !plans.length) {
     return (
       <DashboardShell>
-        <p className="rounded-[10px] bg-[#fef2f2] px-3 py-2 text-sm text-[#b91c1c]">
+        <p className="rounded-[12px] border border-[#fecaca] bg-[#fef2f2] px-3 py-2 text-sm text-[#b91c1c]">
           {error}
         </p>
       </DashboardShell>
@@ -72,7 +74,6 @@ export default function MembershipPlansContent() {
     try {
       const result = await api.subscribeMembership(selectedPlan.id);
       const membership = result.membership;
-      // Instant UI sync before navigation
       setActiveMembership(membership);
       setProfile((prev) =>
         prev ? { ...prev, activeMembership: membership } : prev,
@@ -90,61 +91,142 @@ export default function MembershipPlansContent() {
 
   const currentPlanName =
     activeMembership?.planName ?? profile.activeMembership?.planName ?? "None";
+  const features =
+    selectedPlan.features?.length > 0
+      ? selectedPlan.features
+      : [
+          "Campus parking access",
+          "RFID entry",
+          "Backup Pass while active",
+        ];
 
   return (
     <DashboardShell>
-      <div className="mx-auto max-w-3xl space-y-6">
-        <header>
-          <h1 className="text-[30px] font-semibold text-navy">Plan details</h1>
+      <div className="app-page mx-auto max-w-lg space-y-4 md:space-y-5 pb-2">
+        <MobileAppHeader title="Checkout" subtitle="Confirm your parking pass" />
+        <header className="hidden md:block">
+          <Button href="/membership" variant="ghost" className="mb-2 h-9 gap-1.5 px-2">
+            <ArrowLeft className="h-4 w-4" aria-hidden />
+            Back
+          </Button>
+          <h1 className="text-[28px] font-semibold tracking-tight text-navy">
+            Confirm pass
+          </h1>
         </header>
 
-        <Card className="p-6">
-          <p className="text-sm text-muted">Selected plan</p>
-          <h2 className="mt-2 text-3xl font-semibold text-navy">
-            {selectedPlan.name}
-          </h2>
-          <p className="mt-3 text-2xl font-semibold text-brand-red">
-            {selectedPlan.priceFormatted}
-          </p>
-          <p className="mt-3 text-sm text-muted">{selectedPlan.description}</p>
-
-          <div className="mt-6 space-y-3 rounded-[10px] bg-background p-4 text-sm">
-            <Row label="Student ID" value={profile.user.studentId} />
-            <Row label="Payment method" value="Campus e-wallet (demo)" />
-            <Row label="Duration" value={`${selectedPlan.durationDays} day(s)`} />
-            <Row label="Current plan" value={currentPlanName} />
+        <Card className="animate-fade-up relative overflow-hidden border-brand-blue/15 p-0">
+          <div
+            className="relative px-5 py-5 text-white"
+            style={{
+              background:
+                "linear-gradient(145deg, #0b2e59 0%, #0a3d73 48%, #005daa 120%)",
+            }}
+          >
+            <div className="pointer-events-none absolute -right-6 -top-8 h-28 w-28 rounded-full bg-white/10 blur-2xl" />
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/65">
+              Selected pass
+            </p>
+            <h2 className="mt-1.5 text-2xl font-semibold tracking-tight">
+              {selectedPlan.name}
+            </h2>
+            <p className="mt-3 text-3xl font-semibold tabular-nums tracking-tight">
+              {selectedPlan.priceFormatted}
+            </p>
+            <p className="mt-1 text-sm text-white/75">
+              {selectedPlan.durationDays}{" "}
+              {selectedPlan.durationDays === 1 ? "day" : "days"} · campus lot
+            </p>
           </div>
 
-          {error ? (
-            <p className="mt-4 rounded-[10px] bg-[#fef2f2] px-3 py-2 text-sm text-[#b91c1c]">
-              {error}
-            </p>
-          ) : null}
+          <div className="space-y-4 px-5 py-5">
+            <p className="text-sm text-muted">{selectedPlan.description}</p>
 
-          <div className="mt-6 flex gap-3">
-            <Button href="/membership" variant="secondary">
-              Back
-            </Button>
-            <Button
-              type="button"
-              className="flex-1"
-              disabled={submitting}
-              onClick={handleConfirmPayment}
-            >
-              {submitting ? "Activating…" : "Confirm payment"}
-            </Button>
+            <ul className="space-y-2">
+              {features.map((feature) => (
+                <li key={feature} className="flex items-start gap-2.5 text-sm text-navy">
+                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-light text-brand-blue">
+                    <Check className="h-3 w-3" aria-hidden />
+                  </span>
+                  {feature}
+                </li>
+              ))}
+            </ul>
+
+            <div className="space-y-2.5 rounded-[14px] border border-border/80 bg-surface/60 px-4 py-3.5 text-sm">
+              <Row label="Student ID" value={profile.user.studentId} />
+              <Row
+                label="Payment"
+                value="Campus e-wallet"
+                icon={<Wallet className="h-3.5 w-3.5 text-brand-blue" aria-hidden />}
+              />
+              <Row label="Current plan" value={currentPlanName} />
+            </div>
+
+            {error ? (
+              <p className="rounded-[12px] border border-[#fecaca] bg-[#fef2f2] px-3 py-2 text-sm text-[#b91c1c]">
+                {error}
+              </p>
+            ) : null}
+
+            <div className="flex gap-2.5 pt-1">
+              <Button href="/membership" variant="secondary" className="h-11 px-4">
+                Back
+              </Button>
+              <Button
+                type="button"
+                className="h-11 flex-1"
+                disabled={submitting}
+                onClick={handleConfirmPayment}
+              >
+                {submitting ? "Activating…" : "Confirm payment"}
+              </Button>
+            </div>
           </div>
         </Card>
+
+        {plans.length > 1 ? (
+          <section className="animate-fade-up-delay-1">
+            <p className="mb-2 px-0.5 text-xs font-semibold text-muted">
+              Switch plan
+            </p>
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              {plans.map((plan) => {
+                const selected = plan.id === selectedPlan.id;
+                return (
+                  <Button
+                    key={plan.id}
+                    href={`/membership/plans?plan=${plan.id}`}
+                    variant={selected ? "primary" : "secondary"}
+                    className="h-10 shrink-0 px-4 text-xs"
+                  >
+                    {plan.name}
+                  </Button>
+                );
+              })}
+            </div>
+          </section>
+        ) : null}
       </div>
     </DashboardShell>
   );
 }
 
-function Row({ label, value }: { label: string; value: string }) {
+function Row({
+  label,
+  value,
+  icon,
+}: {
+  label: string;
+  value: string;
+  icon?: ReactNode;
+}) {
   return (
-    <div className="flex justify-between gap-4">
+    <div className="flex items-center justify-between gap-4">
       <span className="text-muted">{label}</span>
-      <span className="font-medium text-navy">{value}</span>
+      <span className="inline-flex items-center gap-1.5 font-medium text-navy">
+        {icon}
+        {value}
+      </span>
     </div>
   );
 }

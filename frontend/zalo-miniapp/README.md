@@ -48,18 +48,22 @@ npm run zmp:start         # Zalo frame preview
 npm run zmp:device        # QR → mở trên Zalo thật (cần APP_ID)
 ```
 
-## 5. Chỉ cần 2 terminal
+## 5. Named tunnel (URL ổn định — khuyến nghị)
 
-Zalo Mini App chạy HTTPS → không gọi được `localhost`. Script gộp API + tunnel:
+Quick tunnel (`trycloudflare.com`) hay hết hạn. Named tunnel cần **domain đã gắn Cloudflare**:
 
 ```bash
-# Terminal 1 — giữ mở (API :5050 + cloudflared, tự ghi VITE_API_URL)
+# Một lần: login CF + tạo tunnel + DNS (thay hostname của bạn)
+npm run parkwise:tunnel:setup -- api.yourdomain.com
+
+# Mỗi ngày: giữ mở (API :5050 + named tunnel)
 npm run parkwise:zalo
 
-# Terminal 2 — chỉ khi cần build lên điện thoại
+# Chỉ khi đổi code Mini App / lần đầu sau setup
 npm run parkwise:zalo:deploy
-# → quét QR "View app at" trong terminal này
 ```
+
+Không có domain → `parkwise:zalo` vẫn fallback quick tunnel (URL đổi / dễ chết).
 
 Nếu deploy báo login hết hạn: `cd frontend/zalo-miniapp && zmp login --app-id 3804607974416934390`
 

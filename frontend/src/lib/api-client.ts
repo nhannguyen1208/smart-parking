@@ -172,6 +172,22 @@ export const api = {
         redemption: unknown;
         points: number;
         message: string;
+        wonDays?: number;
+        isBlindBox?: boolean;
+        prize?: {
+          key: string;
+          name: string;
+          rarity: string;
+          benefitDays: number;
+          image?: string;
+        };
+        prizePreview?: Array<{
+          key: string;
+          name: string;
+          rarity: string;
+          benefitDays: number;
+          image?: string;
+        }>;
       }>("/api/v1/student/rewards/redeem", {
         method: "POST",
         body: JSON.stringify({ rewardId }),

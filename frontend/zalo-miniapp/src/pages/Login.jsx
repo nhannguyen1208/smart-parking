@@ -14,7 +14,7 @@ import {
 export default function Login({ onLoggedIn }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [demoPhone, setDemoPhone] = useState("0901234567");
+  const [demoPhone, setDemoPhone] = useState("0898466842");
   const miniAppId = getMiniAppId();
   const hasRealAppId = Boolean(miniAppId && miniAppId !== "YOUR_ZALO_MINI_APP_ID");
 
@@ -140,7 +140,7 @@ export default function Login({ onLoggedIn }) {
                 value={demoPhone}
                 onChange={(e) => setDemoPhone(e.target.value)}
                 inputMode="tel"
-                placeholder="0901234567"
+                placeholder="0898466842"
                 className="w-full bg-transparent text-sm text-navy outline-none placeholder:text-muted/70"
               />
             </div>

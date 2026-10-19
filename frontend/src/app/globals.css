@@ -104,12 +104,250 @@ body {
   animation: soft-pulse 5s ease-in-out infinite;
 }
 
+/* Mission card — playful cartoon motion */
+@keyframes mission-bounce {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(2deg);
+  }
+}
+
+@keyframes mission-wiggle {
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+  25% {
+    transform: rotate(4deg);
+  }
+  75% {
+    transform: rotate(-4deg);
+  }
+}
+
+@keyframes mission-pop {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes mission-float {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translateY(-10px);
+    opacity: 1;
+  }
+}
+
+@keyframes mission-spark {
+  0%,
+  100% {
+    transform: scale(0.7) rotate(0deg);
+    opacity: 0.35;
+  }
+  50% {
+    transform: scale(1.15) rotate(12deg);
+    opacity: 1;
+  }
+}
+
+@keyframes mission-drive {
+  0% {
+    transform: translateX(-4px);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+  100% {
+    transform: translateX(-4px);
+  }
+}
+
+.mission-bounce {
+  animation: mission-bounce 1.6s ease-in-out infinite;
+}
+
+.mission-wiggle {
+  animation: mission-wiggle 0.9s ease-in-out infinite;
+}
+
+.mission-pop {
+  animation: mission-pop 1.4s ease-in-out infinite;
+}
+
+.mission-float {
+  animation: mission-float 2.8s ease-in-out infinite;
+}
+
+.mission-float-delay {
+  animation: mission-float 2.8s ease-in-out 0.5s infinite;
+}
+
+.mission-spark {
+  animation: mission-spark 1.8s ease-in-out infinite;
+}
+
+.mission-drive {
+  animation: mission-drive 1.2s ease-in-out infinite;
+}
+
+@keyframes mission-xp-shine {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+@keyframes mission-coin-spin {
+  0%,
+  100% {
+    transform: rotateY(0deg) scale(1);
+  }
+  50% {
+    transform: rotateY(180deg) scale(1.06);
+  }
+}
+
+@keyframes mission-pulse-ring {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.45);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(52, 211, 153, 0);
+  }
+}
+
+.mission-xp-fill {
+  background: linear-gradient(
+    90deg,
+    #005daa 0%,
+    #7eb6e8 28%,
+    #fbbf24 55%,
+    #7eb6e8 78%,
+    #005daa 100%
+  );
+  background-size: 200% 100%;
+  animation: mission-xp-shine 2.8s linear infinite;
+}
+
+.mission-coin {
+  animation: mission-coin-spin 2.8s ease-in-out infinite;
+  transform-style: preserve-3d;
+}
+
+.mission-live-ring {
+  animation: mission-pulse-ring 1.8s ease-out infinite;
+}
+
+@keyframes blind-reveal-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.72) translateY(12px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.06) translateY(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes blind-glow-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0 rgba(253, 230, 138, 0.35),
+      0 16px 40px rgba(0, 0, 0, 0.35);
+  }
+  50% {
+    box-shadow:
+      0 0 0 10px rgba(253, 230, 138, 0),
+      0 20px 48px rgba(0, 0, 0, 0.4);
+  }
+}
+
+@keyframes blind-shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+@keyframes blind-sparkle {
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: scale(0.7) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15) rotate(18deg);
+  }
+}
+
+.blind-reveal-pop {
+  animation: blind-reveal-pop 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.blind-glow-pulse {
+  animation: blind-glow-pulse 1.6s ease-in-out infinite;
+}
+
+.blind-shimmer-bar {
+  background: linear-gradient(
+    90deg,
+    #0b2e59 0%,
+    #fde68a 35%,
+    #ffffff 50%,
+    #fde68a 65%,
+    #0b2e59 100%
+  );
+  background-size: 200% 100%;
+  animation: blind-shimmer 1.4s linear infinite;
+}
+
+.blind-sparkle {
+  animation: blind-sparkle 1.2s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-up,
   .animate-fade-up-delay-1,
   .animate-fade-up-delay-2,
   .animate-fade-up-delay-3,
-  .brand-glow {
+  .brand-glow,
+  .mission-bounce,
+  .mission-wiggle,
+  .mission-pop,
+  .mission-float,
+  .mission-float-delay,
+  .mission-spark,
+  .mission-drive,
+  .mission-xp-fill,
+  .mission-coin,
+  .mission-live-ring,
+  .blind-reveal-pop,
+  .blind-glow-pulse,
+  .blind-shimmer-bar,
+  .blind-sparkle {
     animation: none;
   }
 }

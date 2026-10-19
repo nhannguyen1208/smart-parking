@@ -20,6 +20,7 @@
     "parkwise:app": "npm run dev --prefix frontend/zalo-miniapp",
     "parkwise:zalo": "node scripts/parkwise-zalo.mjs",
     "parkwise:zalo:deploy": "npm run zmp:deploy --prefix frontend/zalo-miniapp",
+    "parkwise:tunnel:setup": "node scripts/setup-named-tunnel.mjs",
     "parkwise:rfid": "npm run simulate:rfid --prefix backend/parkwise-sqlite",
     "parkwise:db": "npm run db:studio --prefix backend/parkwise-sqlite",
     "parkwise:seed": "npm run db:seed --prefix backend/parkwise-sqlite"

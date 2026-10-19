@@ -1,0 +1,12 @@
+# Copy to cloudflared/config.yml after setup (gitignored).
+# Or let: npm run parkwise:tunnel:setup -- api.yourdomain.com
+#
+# Named tunnel → stable HTTPS for Zalo Mini App → local :5050
+
+tunnel: PARKWISE_TUNNEL_UUID
+credentials-file: /ABSOLUTE/PATH/TO/home/.cloudflared/PARKWISE_TUNNEL_UUID.json
+
+ingress:
+  - hostname: api.yourdomain.com
+    service: http://127.0.0.1:5050
+  - service: http_status:404
