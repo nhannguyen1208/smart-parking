@@ -17,7 +17,7 @@ const FEATURES = [
   {
     id: "radar",
     label: "Live Radar",
-    hint: "3 bãi ĐH Đà Nẵng",
+    hint: "Chỗ trống realtime",
     tone: "bg-[#e8f5ee] text-[#15803d]",
     icon: "radar",
   },
@@ -235,7 +235,6 @@ export default function Home({ onLogout, onOpenTrack }) {
       <FeatureSheet
         open={sheet === "radar"}
         title="Live Parking Radar"
-        subtitle="Đại học Đà Nẵng · 3 bãi"
         onClose={() => setSheet(null)}
       >
         <ParkingRadar />

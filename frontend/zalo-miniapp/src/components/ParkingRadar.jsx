@@ -165,10 +165,6 @@ export default function ParkingRadar() {
 
   return (
     <div className="space-y-3">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
-        Đại học Đà Nẵng · 3 bãi
-      </p>
-
       <div className="flex flex-wrap gap-2 text-[11px]">
         {(data.legend || []).map((item) => (
           <span

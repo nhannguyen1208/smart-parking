@@ -91,15 +91,6 @@ export default function ParkingPage() {
       <div className="app-page space-y-4 md:space-y-5">
         <MobileAppHeader title="Live Radar" />
 
-        <header className="space-y-1">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-red">
-            Live Parking Radar
-          </p>
-          <h1 className="text-[26px] font-semibold tracking-tight text-navy md:text-[32px]">
-            {data.campus.label}
-          </h1>
-        </header>
-
         <div className="flex flex-wrap items-center gap-3 text-xs">
           {data.legend.map((item) => (
             <span
