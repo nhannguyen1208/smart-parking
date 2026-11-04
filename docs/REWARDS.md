@@ -42,7 +42,7 @@ After `npm run seed` (backend):
 
 - Mission: **Early Arrival Challenge** 07:10–07:20 weekdays, **+10** points
 - Catalog: Weekly (100 pts / 5 days), Monthly (350 pts / 20 days)
-- STU-NHI starts with **80** welcome points
+- `22040002` (Nguyễn Minh Nhân) starts with **80** welcome points
 
 ## Rules
 

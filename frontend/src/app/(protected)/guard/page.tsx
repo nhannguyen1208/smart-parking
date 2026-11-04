@@ -9,10 +9,27 @@ export default function GuardHomePage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    api.v1
-      .guardDashboard()
-      .then(setData)
-      .catch((e) => setError(e.message || "Failed to load"));
+    let cancelled = false;
+    async function load() {
+      try {
+        const next = await api.v1.guardDashboard();
+        if (!cancelled) {
+          setData(next);
+          setError("");
+        }
+      } catch (e) {
+        if (!cancelled) {
+          setError(e instanceof Error ? e.message : "Failed to load");
+        }
+      }
+    }
+    load();
+    // Live feed: ESP32 / MQTT / Verify scan → refresh danh sách event
+    const timer = setInterval(load, 3000);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
   }, []);
 
   const lots = (data?.lots as Array<Record<string, unknown>>) || [];
@@ -26,7 +43,9 @@ export default function GuardHomePage() {
         </p>
         <h1 className="mt-1 text-2xl font-semibold text-navy">Lot capacity & gate feed</h1>
         <p className="mt-1 text-sm text-muted">
-          Estimates from gate events — reconcile when counts drift.{" "}
+          Estimates from gate events (auto-refresh 3s) — ESP32 physical scans
+          appear here via{" "}
+          <code className="text-xs">/api/v1/device/gate-events</code>.{" "}
           {data?.demoMode ? (
             <span className="font-medium text-brand-red">DEMO MODE</span>
           ) : null}
@@ -54,16 +73,26 @@ export default function GuardHomePage() {
       <Card className="p-4">
         <p className="text-sm font-semibold text-navy">Recent gate events</p>
         <ul className="mt-3 space-y-2">
-          {recent.slice(0, 12).map((ev) => (
-            <li
-              key={String(ev.eventId || ev._id)}
-              className="rounded-lg bg-surface px-3 py-2 text-xs text-navy"
-            >
-              {String(ev.eventType)} · {String(ev.result)} · {String(ev.reason)}
-            </li>
-          ))}
+          {recent.slice(0, 12).map((ev) => {
+            const meta = (ev.metadata || {}) as { credentialRaw?: string };
+            return (
+              <li
+                key={String(ev.eventId || ev._id)}
+                className="rounded-lg bg-surface px-3 py-2 text-xs text-navy"
+              >
+                {String(ev.eventType)} · {String(ev.result)} · {String(ev.reason)}
+                {meta.credentialRaw ? (
+                  <span className="mt-0.5 block font-mono text-brand-red">
+                    UID {meta.credentialRaw} — đăng ký tại /guard/cards
+                  </span>
+                ) : null}
+              </li>
+            );
+          })}
           {recent.length === 0 ? (
-            <li className="text-xs text-muted">No events yet — use Verify / Scan.</li>
+            <li className="text-xs text-muted">
+              Chưa có event — quét ESP32 hoặc dùng Check-in / Check-out.
+            </li>
           ) : null}
         </ul>
       </Card>

@@ -6,7 +6,10 @@
   --foreground: #0b2e59;
   --card: #ffffff;
   --border: #e2e7f0;
+  --line: #e2e7f0;
   --muted: #627d98;
+  --ink: #0b2e59;
+  --wash: #eef2f8;
   --navy: #0b2e59;
   --navy-dark: #1e3060;
   --brand-blue: #005daa;
@@ -23,7 +26,10 @@
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-border: var(--border);
+  --color-line: var(--line);
   --color-muted: var(--muted);
+  --color-ink: var(--ink);
+  --color-wash: var(--wash);
   --color-navy: var(--navy);
   --color-navy-dark: var(--navy-dark);
   --color-brand-blue: var(--brand-blue);
@@ -50,9 +56,17 @@ body {
 
 .page-atmosphere {
   background:
-    radial-gradient(1200px 500px at 10% -10%, rgba(0, 93, 170, 0.12), transparent 55%),
-    radial-gradient(900px 420px at 90% 0%, rgba(137, 22, 53, 0.08), transparent 50%),
-    linear-gradient(180deg, #f7f9fc 0%, #eef2f8 100%);
+    radial-gradient(
+      1200px 500px at 10% -10%,
+      color-mix(in srgb, var(--brand-blue) 18%, transparent),
+      transparent 55%
+    ),
+    radial-gradient(
+      900px 420px at 90% 0%,
+      color-mix(in srgb, var(--brand-red) 12%, transparent),
+      transparent 50%
+    ),
+    linear-gradient(180deg, var(--background) 0%, var(--surface) 100%);
 }
 
 @keyframes fade-up {
@@ -119,4 +133,115 @@ body {
   .animate-pulse-ring {
     animation: none;
   }
+}
+
+/* Night-Owl map (kept after CSS parity with web) */
+.field-input {
+  width: 100%;
+  height: 2.75rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+  padding: 0 0.75rem;
+  font-size: 0.875rem;
+  color: var(--navy);
+  outline: none;
+}
+
+.field-input:focus {
+  border-color: var(--brand-blue);
+  box-shadow: 0 0 0 3px rgba(0, 93, 170, 0.12);
+}
+
+.nightowl-pulse {
+  animation: soft-pulse 1.6s ease-in-out infinite;
+}
+
+.nightowl-leaflet .leaflet-control-attribution {
+  font-size: 9px;
+  background: rgba(255, 255, 255, 0.85);
+}
+.nightowl-div-icon {
+  background: transparent;
+  border: none;
+}
+.nightowl-leaflet .leaflet-tooltip {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--navy);
+  font-size: 10px;
+  font-weight: 600;
+  box-shadow: var(--shadow-soft);
+  padding: 2px 6px;
+}
+.nightowl-leaflet .leaflet-tooltip-top::before {
+  border-top-color: var(--card);
+}
+
+.radar-lot-marker {
+  background: transparent !important;
+  border: none !important;
+}
+.radar-lot-pin {
+  width: 88px;
+  height: 58px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 3px;
+  filter: drop-shadow(0 6px 12px rgba(11, 46, 89, 0.22));
+}
+.radar-lot-badge {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  background: var(--lot-color, #64748b);
+  display: grid;
+  place-items: center;
+  border: 2px solid #fff;
+  position: relative;
+}
+.radar-lot-badge::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--lot-color, #64748b);
+}
+.radar-lot-pin.is-selected .radar-lot-badge {
+  width: 40px;
+  height: 40px;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--lot-color) 35%, transparent);
+}
+.radar-lot-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 64px;
+  max-width: 96px;
+  padding: 3px 7px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(11, 46, 89, 0.1);
+  line-height: 1.15;
+}
+.radar-lot-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: #0b2e59;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.radar-lot-meta {
+  margin-top: 1px;
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--lot-color, #64748b);
 }

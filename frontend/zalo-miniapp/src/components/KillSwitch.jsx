@@ -2,7 +2,7 @@ import { useState } from "react";
 import { api } from "../lib/api";
 
 /**
- * Kill-Switch — REST is source of truth; socket syncs peers.
+ * Khoá thẻ (Kill-Switch) — tắt RFID ParkWise tại cổng, không khoá máy xe.
  */
 export default function KillSwitch({
   isLocked = false,
@@ -22,10 +22,10 @@ export default function KillSwitch({
 
     try {
       const data = await api.lockVehicle(next);
-      onChanged?.(Boolean(data.vehicle?.locked), data.vehicle);
+      onChanged?.(Boolean(data.locked ?? next));
     } catch (err) {
       onChanged?.(!next);
-      setError(err.message || "Could not update lock");
+      setError(err.message || "Không cập nhật được khoá thẻ");
     } finally {
       setPending(false);
     }
@@ -43,7 +43,7 @@ export default function KillSwitch({
           disabled={disabled || pending}
           onClick={handleToggle}
           aria-pressed={isLocked}
-          aria-label={isLocked ? "Unlock vehicle" : "Lock vehicle"}
+          aria-label={isLocked ? "Mở khoá thẻ" : "Khoá thẻ"}
           className={`relative flex h-36 w-36 flex-col items-center justify-center rounded-full text-white shadow-[0_12px_40px_rgba(11,46,89,0.35)] transition-all duration-500 active:scale-95 disabled:opacity-70 ${btnClass}`}
         >
           <span
@@ -53,10 +53,12 @@ export default function KillSwitch({
           />
           <LockIcon locked={isLocked} />
           <span className="relative z-10 mt-2 text-[11px] font-bold uppercase tracking-[0.14em]">
-            {pending ? "Syncing…" : isLocked ? "Inactive" : "Active"}
+            {pending ? "Đang lưu…" : isLocked ? "Đã khoá" : "Mở"}
           </span>
         </button>
-        {error ? <p className="mt-3 text-center text-xs text-[#b91c1c]">{error}</p> : null}
+        {error ? (
+          <p className="mt-3 text-center text-xs text-[#b91c1c]">{error}</p>
+        ) : null}
       </div>
     );
   }
@@ -66,13 +68,13 @@ export default function KillSwitch({
       <div className="mb-5 flex items-start justify-between gap-3">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">
-            Kill-Switch
+            Khoá thẻ
           </p>
           <h2 className="mt-1 text-lg font-semibold tracking-tight text-navy">
-            Gate lock
+            Kill-Switch
           </h2>
           <p className="mt-1 max-w-[220px] text-xs leading-relaxed text-muted">
-            Lock to ignore RFID at the silent gate — even if your tag is scanned.
+            Tắt RFID tại cổng ParkWise — thẻ bị quét vẫn bị từ chối.
           </p>
         </div>
         <span
@@ -82,7 +84,7 @@ export default function KillSwitch({
               : "bg-brand-light/70 text-brand-blue ring-1 ring-brand-blue/20"
           }`}
         >
-          {isLocked ? "Secured" : "Ready"}
+          {isLocked ? "Đã khoá" : "Sẵn sàng"}
         </span>
       </div>
 
@@ -96,7 +98,7 @@ export default function KillSwitch({
         >
           <LockIcon locked={isLocked} />
           <span className="mt-2 text-[11px] font-bold uppercase tracking-[0.14em]">
-            {pending ? "Syncing…" : isLocked ? "Inactive" : "Active"}
+            {pending ? "Đang lưu…" : isLocked ? "Đã khoá" : "Mở"}
           </span>
         </button>
         {error ? <p className="mt-3 text-xs text-[#b91c1c]">{error}</p> : null}
@@ -108,28 +110,58 @@ export default function KillSwitch({
 function LockIcon({ locked }) {
   if (locked) {
     return (
-      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" aria-hidden className="relative z-10">
+      <svg
+        width="34"
+        height="34"
+        viewBox="0 0 24 24"
+        fill="none"
+        aria-hidden
+        className="relative z-10"
+      >
         <path
           d="M7 10V8a5 5 0 0 1 10 0v2"
           stroke="currentColor"
           strokeWidth="2"
           strokeLinecap="round"
         />
-        <rect x="5" y="10" width="14" height="10" rx="2.5" stroke="currentColor" strokeWidth="2" />
+        <rect
+          x="5"
+          y="10"
+          width="14"
+          height="10"
+          rx="2.5"
+          stroke="currentColor"
+          strokeWidth="2"
+        />
         <circle cx="12" cy="15" r="1.4" fill="currentColor" />
       </svg>
     );
   }
 
   return (
-    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" aria-hidden className="relative z-10">
+    <svg
+      width="34"
+      height="34"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden
+      className="relative z-10"
+    >
       <path
         d="M7 10V8a5 5 0 0 1 9.5-2"
         stroke="currentColor"
         strokeWidth="2"
         strokeLinecap="round"
       />
-      <rect x="5" y="10" width="14" height="10" rx="2.5" stroke="currentColor" strokeWidth="2" />
+      <rect
+        x="5"
+        y="10"
+        width="14"
+        height="10"
+        rx="2.5"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
       <circle cx="12" cy="15" r="1.4" fill="currentColor" />
     </svg>
   );

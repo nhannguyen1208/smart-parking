@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * One-time setup for a stable Cloudflare named tunnel → :5050
+ * One-time setup for a stable Cloudflare named tunnel → :4000 (shared API)
  *
  * Requires:
  *   - Cloudflare account
@@ -118,7 +118,7 @@ credentials-file: ${credFile}
 
 ingress:
   - hostname: ${hostname}
-    service: http://127.0.0.1:5050
+    service: http://127.0.0.1:4000
   - service: http_status:404
 `;
 fs.writeFileSync(configPath, config);

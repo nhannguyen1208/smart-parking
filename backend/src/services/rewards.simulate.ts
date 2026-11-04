@@ -66,13 +66,13 @@ export async function simulateStudentCheckIn(
 
   const user = await User.findById(userId);
   let credentialRaw = "";
-  if (user?.studentId === "STU-NHI") credentialRaw = "RFID-NHI-001";
+  if (user?.studentId === "22040002") credentialRaw = "RFID-A1B2C3";
   else if (user?.studentId === "STU-TAN") credentialRaw = "RFID-TAN-001";
   else if (user?.studentId === "STU-NGHIA") credentialRaw = "RFID-NGHIA-001";
 
   if (!credentialRaw) {
     const err = new Error(
-      "Simulator needs a known demo RFID tag. Use STU-NHI / STU-TAN / STU-NGHIA seed accounts.",
+      "Simulator needs a known demo RFID tag. Use 22040002 / STU-TAN / STU-NGHIA seed accounts.",
     );
     (err as Error & { code: string; status: number }).code = "SIM_TAG_UNKNOWN";
     (err as Error & { status: number }).status = 400;

@@ -54,7 +54,7 @@ function MembershipPageBody() {
   async function handleCancelPlan() {
     if (
       !window.confirm(
-        "Cancel this parking plan? Backup Pass will stop working immediately.",
+        "Cancel this parking plan?",
       )
     ) {
       return;
@@ -112,17 +112,11 @@ function MembershipPageBody() {
   return (
     <DashboardShell>
       <div className="app-page mx-auto max-w-3xl space-y-4 md:space-y-6 pb-2">
-        <MobileAppHeader
-          title="Membership"
-          subtitle={isActive ? "Campus parking pass" : "Choose a parking pass"}
-        />
+        <MobileAppHeader title="Membership" />
         <header className="hidden md:block">
           <h1 className="text-[30px] font-semibold tracking-tight text-navy">
             Membership
           </h1>
-          <p className="mt-1 text-sm text-muted">
-            Campus parking access, RFID entry, and Backup Pass
-          </p>
         </header>
 
         {justActivated ? (
@@ -166,11 +160,11 @@ function MembershipPageBody() {
                     ? (activeMembership?.planName ?? "Parking plan")
                     : "No active pass"}
                 </h2>
-                <p className="mt-1.5 text-sm text-white/75">
-                  {isActive
-                    ? `Until ${activeMembership!.endDateFormatted}`
-                    : "Register a plan to unlock gate entry & Backup Pass"}
-                </p>
+                {isActive ? (
+                  <p className="mt-1.5 text-sm text-white/75">
+                    Until {activeMembership!.endDateFormatted}
+                  </p>
+                ) : null}
               </div>
               <span
                 className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ${

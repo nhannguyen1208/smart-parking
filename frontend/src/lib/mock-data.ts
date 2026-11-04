@@ -19,7 +19,7 @@ export const faqItems = [
   {
     question: "How do I enter the parking lot?",
     answer:
-      "Tap your student RFID card at the gate or scan your QR parking pass as backup.",
+      "Scan your Backup Pass QR at the gate for entry and exit.",
   },
   {
     question: "What happens when my membership expires?",

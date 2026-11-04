@@ -37,7 +37,8 @@ import { calculateSessionFee } from "./fee.calculator.js";
 export type ProcessGateInput = {
   eventId: string;
   gateCode: string;
-  eventType: "ENTRY" | "EXIT";
+  /** AUTO = check-in nếu chưa có session, check-out nếu đang đỗ */
+  eventType: "ENTRY" | "EXIT" | "AUTO";
   credentialRaw?: string;
   plateNumber?: string;
   occurredAt?: Date | string;
@@ -49,6 +50,10 @@ export type ProcessGateResult = {
   ok: boolean;
   result: string;
   reason: string;
+  /** Resolved direction after AUTO */
+  eventType?: "ENTRY" | "EXIT";
+  /** Raw UID/tag when unregistered — for Guard card enrollment */
+  unregisteredCredential?: string;
   session?: ReturnType<typeof toPublicSession>;
   lot?: ReturnType<typeof toPublicLot>;
   duplicate?: boolean;
@@ -73,6 +78,12 @@ let socketBus: SocketEmitter = {};
 
 export function setParkingSocketBus(bus: SocketEmitter) {
   socketBus = bus;
+}
+
+/** Push a processed gate scan to Guard/Admin web clients (Socket.IO). */
+export function emitGateScanProcessed(payload: unknown) {
+  socketBus.emitToGuards?.("gate:scan-processed", payload);
+  socketBus.emitToAdmins?.("gate:scan-processed", payload);
 }
 
 async function adjustOccupancy(lotId: Types.ObjectId, delta: number) {
@@ -190,37 +201,57 @@ export async function processGateEvent(
     processedAt: new Date(),
   };
 
-  // Resolve credential / kill-switch
-  if (!credential || !vehicle || !user) {
+  // Chỉ cần thẻ đã đăng ký + sinh viên — không bắt buộc xe / biển số
+  if (!credential || !user) {
+    const raw = input.credentialRaw?.trim().toUpperCase() || "";
     await GateEvent.create({
       ...baseEvent,
       eventType:
-        input.eventType === "ENTRY" ? GateEventType.DENIED : GateEventType.MANUAL_REVIEW,
+        input.eventType === "EXIT" ? GateEventType.MANUAL_REVIEW : GateEventType.DENIED,
       result: "REVIEW",
-      reason: "Unregistered credential or vehicle",
+      reason: "Unregistered credential",
+      metadata: raw ? { credentialRaw: raw, needsRegistration: true } : {},
     });
     socketBus.emitToGuards?.("gate:exception-created", {
-      reason: "Unregistered credential or vehicle",
+      reason: "Unregistered credential",
       eventId: input.eventId,
+      credentialRaw: raw || undefined,
     });
     return {
       ok: false,
       result: "REVIEW",
-      reason: "Unregistered credential or vehicle",
+      reason: "Unregistered credential — register card on /guard/cards",
       review: true,
+      unregisteredCredential: raw || undefined,
+      eventType: input.eventType === "EXIT" ? "EXIT" : "ENTRY",
     };
+  }
+
+  // ACTIVE session theo user (RFID) — không phụ thuộc xe
+  const findActiveSession = () =>
+    ParkingSession.findOne({
+      userId: user!._id,
+      status: ParkingSessionStatus.ACTIVE,
+    });
+
+  // AUTO: check-in nếu chưa có session ACTIVE, ngược lại check-out
+  let eventType: "ENTRY" | "EXIT" =
+    input.eventType === "EXIT" ? "EXIT" : "ENTRY";
+  if (input.eventType === "AUTO") {
+    const activeForAuto = await findActiveSession();
+    eventType = activeForAuto ? "EXIT" : "ENTRY";
   }
 
   if (
     credential.status !== RfidCredentialStatus.ACTIVE ||
-    vehicle.status !== VehicleStatus.ACTIVE ||
+    (vehicle && vehicle.status !== VehicleStatus.ACTIVE) ||
     (user as { status?: string }).status === UserStatus.SUSPENDED
   ) {
     await GateEvent.create({
       ...baseEvent,
       eventType: GateEventType.DENIED,
       result: "DENIED",
-      reason: "Credential or vehicle access disabled (Kill-Switch / suspended)",
+      reason: "Credential access disabled (Kill-Switch / suspended)",
     });
     socketBus.emitToGuards?.("gate:exception-created", {
       reason: "ParkWise access disabled",
@@ -239,7 +270,7 @@ export async function processGateEvent(
     };
   }
 
-  if (input.eventType === "ENTRY") {
+  if (eventType === "ENTRY") {
     if (lot.status === ParkingLotStatus.FULL) {
       await GateEvent.create({
         ...baseEvent,
@@ -252,32 +283,31 @@ export async function processGateEvent(
         result: "DENIED",
         reason: "Lot full (estimated)",
         denied: true,
+        eventType,
         lot: toPublicLot(lot),
       };
     }
 
-    const active = await ParkingSession.findOne({
-      vehicleId: vehicle._id,
-      status: ParkingSessionStatus.ACTIVE,
-    });
+    const active = await findActiveSession();
     if (active) {
       await GateEvent.create({
         ...baseEvent,
         eventType: GateEventType.MANUAL_REVIEW,
         result: "REVIEW",
-        reason: "Vehicle already has an active session",
+        reason: "Student already has an active session",
       });
       return {
         ok: false,
         result: "REVIEW",
-        reason: "Vehicle already has an active session",
+        reason: "Student already has an active session",
         review: true,
+        eventType,
         session: toPublicSession(active),
       };
     }
 
     const session = await ParkingSession.create({
-      vehicleId: vehicle._id,
+      ...(vehicle ? { vehicleId: vehicle._id } : {}),
       userId: user._id,
       lotId: lot._id,
       entryGateId: gate._id,
@@ -291,7 +321,7 @@ export async function processGateEvent(
       ...baseEvent,
       eventType: GateEventType.ENTRY,
       result: "ALLOWED",
-      reason: "Entry accepted",
+      reason: "Check-in (ENTRY) accepted",
     });
 
     const updatedLot = await adjustOccupancy(lot._id, 1);
@@ -347,18 +377,16 @@ export async function processGateEvent(
     return {
       ok: true,
       result: "ALLOWED",
-      reason: "Entry accepted",
+      reason: "Check-in (ENTRY) accepted",
+      eventType,
       session: publicSession,
       lot: updatedLot ? toPublicLot(updatedLot) : toPublicLot(lot),
       rewards,
     };
   }
 
-  // EXIT
-  const active = await ParkingSession.findOne({
-    vehicleId: vehicle._id,
-    status: ParkingSessionStatus.ACTIVE,
-  });
+  // EXIT / check-out
+  const active = await findActiveSession();
 
   if (!active) {
     await GateEvent.create({
@@ -376,6 +404,7 @@ export async function processGateEvent(
       result: "REVIEW",
       reason: "Exit with no active session — no occupancy decrement",
       review: true,
+      eventType,
     };
   }
 
@@ -407,7 +436,7 @@ export async function processGateEvent(
     ...baseEvent,
     eventType: GateEventType.EXIT,
     result: "ALLOWED",
-    reason: "Exit accepted",
+    reason: "Check-out (EXIT) accepted",
   });
 
   const updatedLot = await adjustOccupancy(active.lotId, -1);
@@ -415,11 +444,13 @@ export async function processGateEvent(
   socketBus.emitToUser?.(user._id.toString(), "parking:session-updated", {
     session: publicSession,
   });
+  socketBus.emitToGuards?.("parking:session-updated", { session: publicSession });
 
   return {
     ok: true,
     result: "ALLOWED",
-    reason: "Exit accepted",
+    reason: "Check-out (EXIT) accepted",
+    eventType,
     session: publicSession,
     lot: updatedLot ? toPublicLot(updatedLot) : undefined,
   };

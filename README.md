@@ -15,6 +15,7 @@ smart-parking/
 │   └── zalo-miniapp/         # Zalo Mini App (Vite + zmp)
 ├── backend/                  # Express + MongoDB API (:4000)
 │   └── parkwise-sqlite/      # Optional SQLite gate demo (:5050)
+├── firmware/esp32-gate/      # ESP32 + RC522 + 2 servo barriers (Arduino)
 ├── docs/                     # Architecture, demo guide, rewards
 ├── infra/                    # Docker Compose (Mongo, Mosquitto)
 └── scripts/                  # Helper scripts (Zalo tunnel, DB UI)
@@ -57,13 +58,13 @@ npm run seed
 
 | Role | Login | Password |
 |------|-------|----------|
-| Student Nhi | `STU-NHI` | `password123` |
+| Student Nhân | `22040002` / `nhan.nguyen220402@vnuk.edu.vn` | `password123` |
 | Student Tân | `STU-TAN` | `password123` |
 | Student Nghĩa | `STU-NGHIA` | `password123` |
 | Guard | `G-1001` | `password123` |
 | Admin | `A-9001` | `password123` |
 
-RFID tags: `RFID-NHI-001`, `RFID-TAN-001`, `RFID-NGHIA-001`
+RFID tags: `RFID-A1B2C3`, `RFID-TAN-001`, `RFID-NGHIA-001`
 
 ---
 

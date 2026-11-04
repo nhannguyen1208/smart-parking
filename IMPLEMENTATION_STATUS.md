@@ -44,7 +44,7 @@ Last updated: 2026-10-18
 |-------|--------|
 | `cd server && npm test` (vitest) | **5 passed** |
 | `cd server && npm run typecheck` | **pass** |
-| Manual smoke: login Nhi + Guard ENTRY `RFID-NHI-001` | **ALLOWED**, session created |
+| Manual smoke: login Nhân + Guard ENTRY `RFID-A1B2C3` | **ALLOWED**, session created |
 | `npm run lint` (repo root) | Many pre-existing warnings/errors outside this MVP scope |
 
 ## Outstanding for production

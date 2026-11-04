@@ -334,7 +334,7 @@ export function MissionCard({
             <ObjectiveRow
               index={2}
               done={cleared}
-              label="Check in with RFID or Backup Pass"
+              label="Check in with Backup Pass"
             />
           </ul>
         </div>

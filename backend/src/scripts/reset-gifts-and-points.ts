@@ -6,7 +6,7 @@ import { RewardRedemption } from "../models/RewardRedemption.js";
 import { ParkingReward } from "../models/ParkingReward.js";
 import { getPointsBalance } from "../services/rewards.service.js";
 
-const studentId = process.argv[2] || "STU-NHI";
+const studentId = process.argv[2] || "22040002";
 const amount = Number(process.argv[3] || 800);
 
 /** Clearer prize ladder — physical gifts + parking, each box distinct */

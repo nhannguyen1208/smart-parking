@@ -11,7 +11,7 @@ export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, loading, error, login, clearError } = useAuth();
-  const [identifier, setIdentifier] = useState("STU-NHI");
+  const [identifier, setIdentifier] = useState("22040002");
   const [password, setPassword] = useState("password123");
   const [submitting, setSubmitting] = useState(false);
 
@@ -132,7 +132,7 @@ export default function LoginPage() {
               {submitting ? "Signing in…" : "Sign in"}
             </Button>
             <p className="pt-1 text-center text-[11px] text-muted">
-              Demo · STU-NHI · password123
+              Demo · 22040002 · password123
             </p>
           </form>
         </div>

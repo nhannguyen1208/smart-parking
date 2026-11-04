@@ -65,7 +65,10 @@ export default function GuestPass() {
 
       {pass && qrDataUrl ? (
         <div className="mt-5">
-          <div className="mx-auto flex h-52 w-52 items-center justify-center rounded-[16px] border border-border/80 bg-white p-3 shadow-[var(--shadow-card)]">
+          <div
+            className="mx-auto flex h-52 w-52 items-center justify-center rounded-[16px] border border-border/80 p-3 shadow-[var(--shadow-card)]"
+            style={{ background: "var(--brand-light)" }}
+          >
             <img
               src={qrDataUrl}
               alt="Backup Pass QR"

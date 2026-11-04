@@ -1,12 +1,32 @@
 export const CHAT_QUICK_REPLIES = [
+  "Khoá thẻ",
   "Backup Pass QR",
-  "Kill-Switch",
-  "Zone Memory",
   "Night-Owl",
-  "Parking help",
 ];
 
 const RULES = [
+  {
+    id: "kill-switch",
+    keywords: [
+      "khoa",
+      "khoá",
+      "khoa the",
+      "khoá thẻ",
+      "kill",
+      "switch",
+      "lock",
+      "rfid",
+      "disable",
+      "inactive",
+      "bao mat",
+      "bảo mật",
+    ],
+    reply: {
+      text: "Khoá thẻ (Kill-Switch) tắt RFID ParkWise tại cổng — không khoá máy xe. Bật/tắt ngay trên màn hình chính Mini App (cùng tài khoản web).",
+      action: null,
+      actionLabel: null,
+    },
+  },
   {
     id: "guest-pass",
     keywords: [
@@ -30,39 +50,9 @@ const RULES = [
       "30k",
     ],
     reply: {
-      text: "Backup Pass is your time-limited QR when you lose or forget your RFID card. Open Backup from Features — you need an active campus plan on the web Membership page. Using it counts for Rewards.",
+      text: "Backup Pass là QR tạm khi quên thẻ. Mở Backup Pass trong tiện ích — cần gói gửi xe trên web. Dùng QR cũng tính Rewards.",
       action: "guest",
-      actionLabel: "Open Backup Pass",
-    },
-  },
-  {
-    id: "kill-switch",
-    keywords: [
-      "kill",
-      "switch",
-      "active",
-      "inactive",
-      "lock",
-      "rfid",
-      "khoa",
-      "khoá",
-      "disable",
-      "enable",
-      "gate",
-    ],
-    reply: {
-      text: "Kill-Switch sets gate access to Active or Inactive. Inactive ignores RFID until you unlock again — use the big button on the home card.",
-      action: null,
-      actionLabel: null,
-    },
-  },
-  {
-    id: "zone",
-    keywords: ["zone", "memory", "spot", "vi tri", "vị trí", "do", "đỗ", "parked", "row"],
-    reply: {
-      text: "Zone Memory saves where you parked (zone, row, note) so you can find your bike later.",
-      action: "zone",
-      actionLabel: "Open Zone Memory",
+      actionLabel: "Mở Backup Pass",
     },
   },
   {
@@ -77,11 +67,13 @@ const RULES = [
       "track",
       "location",
       "gps",
+      "ve nha",
+      "về nhà",
     ],
     reply: {
-      text: "Night-Owl starts a safe-ride share link so a friend can follow your trip home. Location is only used while the session is active.",
+      text: "Night-Owl tạo link theo dõi khi bạn về nhà. Chỉ dùng vị trí trong lúc phiên đang chạy.",
       action: "night",
-      actionLabel: "Open Night-Owl",
+      actionLabel: "Mở Night-Owl",
     },
   },
   {
@@ -99,9 +91,11 @@ const RULES = [
       "sos",
       "tro giup",
       "trợ giúp",
+      "xe",
+      "vehicle",
     ],
     reply: {
-      text: "For lot occupancy and SOS forms, use the ParkWise web app (Dashboard / Parking / Help). In this Mini App you can lock the gate, open Backup Pass, save your zone, or start Night-Owl.",
+      text: "Chỗ trống, membership và SOS trên web ParkWise. Mini App: Khoá thẻ, Backup Pass, Night-Owl — cùng tài khoản.",
       action: null,
       actionLabel: null,
     },
@@ -120,7 +114,7 @@ export function matchChatFaq(input) {
   const q = normalize(input);
   if (!q) {
     return {
-      text: "Ask about Backup Pass, Kill-Switch, Zone Memory, or Night-Owl — or tap a quick reply.",
+      text: "Hỏi về Backup Pass hoặc Night-Owl — hoặc chọn câu nhanh bên dưới.",
     };
   }
 
@@ -131,10 +125,10 @@ export function matchChatFaq(input) {
   }
 
   return {
-    text: "I can help with Backup Pass QR, Kill-Switch (Active/Inactive), Zone Memory, and Night-Owl. For membership billing or SOS, open ParkWise on the web.",
+    text: "Mình hỗ trợ Backup Pass và Night-Owl. Membership / SOS mở trên web ParkWise.",
   };
 }
 
 export const CHAT_WELCOME = {
-  text: "Hi — I’m ParkWise Assist. Same helper as the web app. Ask about Backup Pass, Kill-Switch, Zone, or Night-Owl.",
+  text: "Xin chào — ParkWise Assist. Hỏi Backup Pass hoặc Night-Owl nhé.",
 };

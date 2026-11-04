@@ -12,10 +12,12 @@
     "zmp:start": "zmp start",
     "zmp:device": "zmp start -D",
     "zmp:deploy": "npm run build && zmp deploy -e -p -o dist -m \"ParkWise dev\"",
+    "zmp:deploy:testing": "npm run build && zmp deploy -e -p -t -o dist -m \"ParkWise Testing\"",
     "zmp:deploy:ui": "npm run build && zmp deploy -e -o dist",
     "zmp:sync": "zmp sync-config dist/index.html"
   },
   "dependencies": {
+    "leaflet": "^1.9.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "socket.io-client": "^4.8.1",
@@ -23,6 +25,7 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.0.14",
+    "@types/leaflet": "^1.9.22",
     "@vitejs/plugin-react": "^4.3.4",
     "tailwindcss": "^4.0.14",
     "vite": "^6.2.2"

@@ -91,19 +91,12 @@ export default function MembershipPlansContent() {
 
   const currentPlanName =
     activeMembership?.planName ?? profile.activeMembership?.planName ?? "None";
-  const features =
-    selectedPlan.features?.length > 0
-      ? selectedPlan.features
-      : [
-          "Campus parking access",
-          "RFID entry",
-          "Backup Pass while active",
-        ];
+  const features = selectedPlan.features?.length ? selectedPlan.features : [];
 
   return (
     <DashboardShell>
       <div className="app-page mx-auto max-w-lg space-y-4 md:space-y-5 pb-2">
-        <MobileAppHeader title="Checkout" subtitle="Confirm your parking pass" />
+        <MobileAppHeader title="Checkout" />
         <header className="hidden md:block">
           <Button href="/membership" variant="ghost" className="mb-2 h-9 gap-1.5 px-2">
             <ArrowLeft className="h-4 w-4" aria-hidden />
@@ -139,18 +132,18 @@ export default function MembershipPlansContent() {
           </div>
 
           <div className="space-y-4 px-5 py-5">
-            <p className="text-sm text-muted">{selectedPlan.description}</p>
-
-            <ul className="space-y-2">
-              {features.map((feature) => (
-                <li key={feature} className="flex items-start gap-2.5 text-sm text-navy">
-                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-light text-brand-blue">
-                    <Check className="h-3 w-3" aria-hidden />
-                  </span>
-                  {feature}
-                </li>
-              ))}
-            </ul>
+            {features.length > 0 ? (
+              <ul className="space-y-2">
+                {features.map((feature) => (
+                  <li key={feature} className="flex items-start gap-2.5 text-sm text-navy">
+                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-light text-brand-blue">
+                      <Check className="h-3 w-3" aria-hidden />
+                    </span>
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
 
             <div className="space-y-2.5 rounded-[14px] border border-border/80 bg-surface/60 px-4 py-3.5 text-sm">
               <Row label="Student ID" value={profile.user.studentId} />

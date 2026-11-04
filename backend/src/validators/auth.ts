@@ -15,4 +15,11 @@ export const updateProfileSchema = z.object({
   name: z.string().trim().min(1).optional(),
   vehicleNumber: z.string().trim().optional(),
   vehicleType: z.string().trim().optional(),
+  preferences: z
+    .object({
+      qrTheme: z
+        .enum(["vnuk", "crimson", "ocean", "midnight", "mint", "sunset"])
+        .optional(),
+    })
+    .optional(),
 });

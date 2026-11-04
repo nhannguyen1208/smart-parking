@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getToken } from "./lib/auth";
 import { appPath, parseRoute } from "./lib/routing";
+import { resetAppTheme } from "./lib/themes";
 import Home from "./pages/Home.jsx";
 import Login from "./pages/Login.jsx";
 import Track from "./pages/Track.jsx";
@@ -14,6 +15,10 @@ export default function App() {
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
   }, []);
+
+  useEffect(() => {
+    if (!authed) resetAppTheme();
+  }, [authed]);
 
   function goTrack(token) {
     window.history.pushState({}, "", appPath(`/track/${token}`));

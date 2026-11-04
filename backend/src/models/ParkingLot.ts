@@ -6,6 +6,9 @@ const parkingLotSchema = new Schema(
     name: { type: String, required: true, trim: true },
     code: { type: String, required: true, unique: true, uppercase: true, trim: true },
     locationDescription: { type: String, default: "" },
+    campus: { type: String, default: "Đại học Đà Nẵng" },
+    latitude: { type: Number },
+    longitude: { type: Number },
     totalCapacity: { type: Number, required: true, min: 0 },
     currentOccupancyEstimate: { type: Number, required: true, min: 0, default: 0 },
     status: {
@@ -26,6 +29,9 @@ export type ParkingLotDocument = HydratedDocument<{
   name: string;
   code: string;
   locationDescription: string;
+  campus: string;
+  latitude?: number;
+  longitude?: number;
   totalCapacity: number;
   currentOccupancyEstimate: number;
   status: ParkingLotStatus;
@@ -53,29 +59,56 @@ export function computeLotStatus(
   return ParkingLotStatus.AVAILABLE;
 }
 
+/** Color for Live Parking Radar map pins */
+export function radarColorForStatus(status: ParkingLotStatus): string {
+  switch (status) {
+    case ParkingLotStatus.AVAILABLE:
+      return "#16a34a";
+    case ParkingLotStatus.NEARLY_FULL:
+      return "#d97706";
+    case ParkingLotStatus.FULL:
+      return "#dc2626";
+    default:
+      return "#64748b";
+  }
+}
+
 export function toPublicLot(lot: {
   _id: { toString(): string };
   name: string;
   code: string;
   locationDescription: string;
+  campus?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   totalCapacity: number;
   currentOccupancyEstimate: number;
   status: ParkingLotStatus;
   countSource: string;
+  nearlyFullThresholdPct?: number | null;
   lastReconciledAt?: Date | null;
   anomalyFlag: boolean;
   updatedAt: Date;
 }) {
   const available = Math.max(0, lot.totalCapacity - lot.currentOccupancyEstimate);
+  const fillPct =
+    lot.totalCapacity > 0
+      ? Math.round((lot.currentOccupancyEstimate / lot.totalCapacity) * 100)
+      : 0;
   return {
     id: lot._id.toString(),
     name: lot.name,
     code: lot.code,
     locationDescription: lot.locationDescription,
+    campus: lot.campus || "Đại học Đà Nẵng",
+    latitude: lot.latitude ?? null,
+    longitude: lot.longitude ?? null,
     totalCapacity: lot.totalCapacity,
     currentOccupancyEstimate: lot.currentOccupancyEstimate,
     availableEstimate: available,
+    fillPct,
     status: lot.status,
+    radarColor: radarColorForStatus(lot.status),
     countSource: lot.countSource,
     estimated: true,
     lastReconciledAt: lot.lastReconciledAt ?? null,

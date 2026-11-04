@@ -23,17 +23,17 @@ npm run dev
 
 | Role | ID / email | Password |
 |------|------------|----------|
-| Student Nhi | `STU-NHI` / `nhi.demo@vnuk.local` | `password123` |
+| Student Nhân | `22040002` / `nhan.nguyen220402@vnuk.edu.vn` | `password123` |
 | Student Tân | `STU-TAN` | `password123` |
 | Student Nghĩa | `STU-NGHIA` | `password123` |
 | Guard | `G-1001` / `guard001@vnuk.local` | `password123` |
 | Admin | `A-9001` / `admin001@vnuk.local` | `password123` |
 
-RFID demo tags: `RFID-NHI-001`, `RFID-TAN-001`, `RFID-NGHIA-001`
+RFID demo tags: `RFID-A1B2C3`, `RFID-TAN-001`, `RFID-NGHIA-001`
 
 ## Suggested flows
 
-1. Login as Nhi → Profile Kill-Switch → Guard simulate ENTRY with `RFID-NHI-001` → expect DENIED.  
+1. Login as Nhân → Profile Kill-Switch → Guard simulate ENTRY with `RFID-A1B2C3` → expect DENIED.  
 2. Restore access → Guard ENTRY → session + occupancy +1.  
 3. Student Backup Pass → Guard verify with token → single use (earns Rewards).  
 4. Admin → Integrations shows DEMO / Not configured.

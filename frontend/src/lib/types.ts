@@ -1,13 +1,19 @@
 export type UserRole = "STUDENT" | "GUARD" | "ADMIN";
 
+export type UserPreferences = {
+  qrTheme?: string | null;
+};
+
 export type User = {
   id: string;
   studentId: string;
   name: string;
   email: string;
   role: UserRole;
-  vehicleNumber: string;
-  vehicleType: string;
+  phone?: string | null;
+  zaloUserId?: string | null;
+  linkedZalo?: boolean;
+  preferences?: UserPreferences;
   createdAt: string;
   updatedAt: string;
 };

@@ -19,8 +19,6 @@ export default function ProfilePage() {
   const [data, setData] = useState<ProfileData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [pending, setPending] = useState(false);
-  const [rfid, setRfid] = useState<Array<Record<string, unknown>>>([]);
 
   useEffect(() => {
     setLoading(true);
@@ -31,35 +29,7 @@ export default function ProfilePage() {
         setError(err instanceof ApiError ? err.message : "Failed to load profile");
       })
       .finally(() => setLoading(false));
-    api.v1
-      .studentRfid()
-      .then((rows) => setRfid(rows as Array<Record<string, unknown>>))
-      .catch(() => undefined);
   }, [pathname]);
-
-  async function setAccessActive(active: boolean) {
-    if (pending) return;
-    const disable = !active;
-    if (
-      !window.confirm(
-        disable
-          ? "Set access to Inactive? ParkWise gate entry will be denied."
-          : "Set access to Active? ParkWise gate entry will be allowed.",
-      )
-    ) {
-      return;
-    }
-    setPending(true);
-    try {
-      await api.v1.killSwitch({ disable });
-      const rows = (await api.v1.studentRfid()) as Array<Record<string, unknown>>;
-      setRfid(rows);
-    } catch (err) {
-      window.alert(err instanceof Error ? err.message : "Failed to update access");
-    } finally {
-      setPending(false);
-    }
-  }
 
   if (loading) {
     return (
@@ -80,9 +50,6 @@ export default function ProfilePage() {
   }
 
   const { user, activeMembership } = data;
-  const rfidSuffix = rfid[0] ? String(rfid[0].displaySuffix) : "————";
-  const rfidStatus = rfid[0] ? String(rfid[0].status) : "UNLINKED";
-  const isActive = rfidStatus === "ACTIVE";
   const initials = user.name
     .split(/\s+/)
     .filter(Boolean)
@@ -127,16 +94,8 @@ export default function ProfilePage() {
         </Card>
 
         <div className="relative mx-auto w-full max-w-[520px]">
-          <div
-            className="pointer-events-none absolute -inset-3 rounded-[28px] opacity-60 blur-2xl"
-            style={{
-              background:
-                "radial-gradient(circle at 20% 20%, rgba(0,93,170,0.35), transparent 55%), radial-gradient(circle at 80% 80%, rgba(137,22,53,0.28), transparent 50%)",
-            }}
-          />
-
           <article
-            className="relative flex flex-col overflow-hidden rounded-[22px] text-white shadow-[0_24px_60px_rgba(11,46,89,0.28)] ring-1 ring-white/10"
+            className="relative flex flex-col overflow-hidden rounded-[22px] text-white ring-1 ring-white/10"
             style={{
               background:
                 "linear-gradient(145deg, #0b2e59 0%, #0a3d73 42%, #891635 160%)",
@@ -150,15 +109,13 @@ export default function ProfilePage() {
                   "repeating-linear-gradient(-18deg, transparent, transparent 12px, rgba(255,255,255,0.55) 12px, rgba(255,255,255,0.55) 13px)",
               }}
             />
-            <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-white/10 blur-2xl" />
-            <div className="pointer-events-none absolute -bottom-24 -left-10 h-48 w-48 rounded-full bg-[#891635]/40 blur-2xl" />
 
             <div className="relative border-b border-white/15 px-5 pb-3 pt-4 sm:px-6 sm:pt-5">
               <VNUKWordmark onDark size="sm" />
             </div>
 
             <div className="relative grid flex-1 grid-cols-[0.9fr_1.35fr] gap-3 px-4 py-4 sm:gap-4 sm:px-6 sm:py-5">
-              <div className="flex flex-col items-center justify-between">
+              <div className="flex flex-col items-center justify-center">
                 <div className="relative flex aspect-[3/4] w-full max-w-[118px] items-center justify-center overflow-hidden rounded-xl bg-gradient-to-b from-[#dbe5ff] to-[#b8c9ef] text-[#0b2e59] shadow-inner ring-2 ring-white/35">
                   <span className="text-3xl font-bold tracking-tight sm:text-4xl">
                     {initials || user.name.charAt(0)}
@@ -167,78 +124,44 @@ export default function ProfilePage() {
                     Photo
                   </div>
                 </div>
-                <div className="mt-2 hidden w-full rounded-md bg-black/25 px-2 py-1.5 sm:block">
-                  <p className="text-[8px] uppercase tracking-wide text-white/50">RFID</p>
-                  <p className="font-mono text-[11px] font-semibold tracking-[0.2em]">
-                    ••••{rfidSuffix}
-                  </p>
-                </div>
               </div>
 
-              <div className="flex min-w-0 flex-col justify-between py-0.5">
-                <div>
-                  <Field label="Họ và tên / Full name" value={user.name} large />
-                  <div className="mt-2.5 grid grid-cols-2 gap-2 sm:mt-3 sm:gap-3">
-                    <Field label="Mã SV / Student ID" value={user.studentId} mono />
-                    <Field
-                      label="Hạng / Role"
-                      value={user.role === "STUDENT" ? "Sinh viên" : user.role}
-                    />
-                  </div>
-                  <div className="mt-2.5 sm:mt-3">
-                    <Field label="Email" value={user.email} compact />
-                  </div>
-                  <div className="mt-2.5 grid grid-cols-2 gap-2 sm:mt-3">
-                    <Field
-                      label="Gói gửi xe"
-                      value={
-                        activeMembership
-                          ? activeMembership.planName || activeMembership.status
-                          : "Chưa đăng ký"
-                      }
-                    />
-                    <Field
-                      label="Hiệu lực đến"
-                      value={activeMembership?.endDateFormatted ?? "—"}
-                    />
-                  </div>
+              <div className="flex min-w-0 flex-col justify-center py-0.5">
+                <Field label="Họ và tên / Full name" value={user.name} large />
+                <div className="mt-2.5 grid grid-cols-2 gap-2 sm:mt-3 sm:gap-3">
+                  <Field label="Mã SV / Student ID" value={user.studentId} mono />
+                  <Field
+                    label="Hạng / Role"
+                    value={user.role === "STUDENT" ? "Sinh viên" : user.role}
+                  />
                 </div>
-
-                {/* Active / Inactive toggle (Kill-Switch) */}
-                <div className="mt-2 border-t border-white/15 pt-2.5">
-                  <p className="mb-1.5 text-[8px] font-semibold uppercase tracking-[0.14em] text-white/45">
-                    Gate access
-                  </p>
-                  <div
-                    className="inline-flex rounded-full bg-black/30 p-0.5 ring-1 ring-white/15"
-                    role="group"
-                    aria-label="Gate access status"
-                  >
-                    <button
-                      type="button"
-                      disabled={pending || !rfid[0]}
-                      onClick={() => setAccessActive(true)}
-                      className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wide transition disabled:opacity-50 ${
-                        isActive
-                          ? "bg-emerald-400 text-[#04322a] shadow-sm"
-                          : "text-white/55 hover:text-white/85"
-                      }`}
-                    >
-                      Active
-                    </button>
-                    <button
-                      type="button"
-                      disabled={pending || !rfid[0]}
-                      onClick={() => setAccessActive(false)}
-                      className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wide transition disabled:opacity-50 ${
-                        !isActive
-                          ? "bg-[#ffb3c4] text-[#5c1024] shadow-sm"
-                          : "text-white/55 hover:text-white/85"
-                      }`}
-                    >
-                      Inactive
-                    </button>
-                  </div>
+                <div className="mt-2.5 sm:mt-3">
+                  <Field label="Email" value={user.email} compact />
+                </div>
+                <div className="mt-2.5 sm:mt-3">
+                  <Field
+                    label="Zalo"
+                    value={
+                      user.linkedZalo
+                        ? `Đã liên kết${user.phone ? ` · ${user.phone}` : ""}`
+                        : "Chưa liên kết"
+                    }
+                    compact
+                  />
+                </div>
+                <div className="mt-2.5 grid grid-cols-2 gap-2 sm:mt-3">
+                  <Field
+                    label="Gói gửi xe"
+                    value={
+                      activeMembership
+                        ? activeMembership.planName || activeMembership.status
+                        : "Chưa đăng ký"
+                    }
+                  />
+                  <Field
+                    label="Hiệu lực đến"
+                    value={activeMembership?.endDateFormatted ?? "—"}
+                  />
                 </div>
               </div>
             </div>

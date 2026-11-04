@@ -3,7 +3,7 @@ import { ParkingSessionStatus } from "../types/enums.js";
 
 const parkingSessionSchema = new Schema(
   {
-    vehicleId: { type: Schema.Types.ObjectId, ref: "Vehicle", required: true, index: true },
+    vehicleId: { type: Schema.Types.ObjectId, ref: "Vehicle", index: true },
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
     lotId: { type: Schema.Types.ObjectId, ref: "ParkingLot", required: true, index: true },
     entryGateId: { type: Schema.Types.ObjectId, ref: "GateDevice" },
@@ -29,7 +29,7 @@ parkingSessionSchema.index({ userId: 1, status: 1 });
 parkingSessionSchema.index({ vehicleId: 1, status: 1 });
 
 export type ParkingSessionDocument = HydratedDocument<{
-  vehicleId: Types.ObjectId;
+  vehicleId?: Types.ObjectId;
   userId: Types.ObjectId;
   lotId: Types.ObjectId;
   entryGateId?: Types.ObjectId;
@@ -50,7 +50,7 @@ export const ParkingSession = model("ParkingSession", parkingSessionSchema);
 
 export function toPublicSession(s: {
   _id: { toString(): string };
-  vehicleId: { toString(): string };
+  vehicleId?: { toString(): string } | null;
   userId: { toString(): string };
   lotId: { toString(): string };
   entryGateId?: { toString(): string } | null;
@@ -64,7 +64,7 @@ export function toPublicSession(s: {
 }) {
   return {
     id: s._id.toString(),
-    vehicleId: s.vehicleId.toString(),
+    vehicleId: s.vehicleId?.toString() ?? null,
     userId: s.userId.toString(),
     lotId: s.lotId.toString(),
     entryGateId: s.entryGateId?.toString() ?? null,

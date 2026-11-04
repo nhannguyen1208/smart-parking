@@ -70,93 +70,56 @@ export default function Login({ onLoggedIn }) {
   }
 
   return (
-    <div className="page-atmosphere min-h-screen overflow-hidden">
+    <div className="page-atmosphere min-h-screen">
       <AccentBar />
-      <div className="relative mx-auto flex min-h-[calc(100vh-5px)] w-full max-w-md flex-col gap-5 px-4 py-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-[max(1.25rem,env(safe-area-inset-top))]">
-        <div className="pointer-events-none absolute -left-16 top-16 h-56 w-56 rounded-full bg-brand-blue/15 blur-3xl brand-glow" />
-        <div className="pointer-events-none absolute -right-10 bottom-24 h-64 w-64 rounded-full bg-brand-red/10 blur-3xl" />
-
-        <section className="animate-fade-up relative overflow-hidden rounded-[24px] bg-gradient-to-br from-[#005daa] via-[#0b4f8a] to-[#0b2e59] p-6 text-brand-light shadow-[0_24px_60px_rgba(11,46,89,0.28)]">
-          <div className="absolute inset-0 opacity-30">
-            <div className="absolute left-6 top-20 h-28 w-28 rounded-full border border-white/20" />
-            <div className="absolute right-8 top-10 h-16 w-16 rounded-full border border-white/15" />
-          </div>
-          <div className="relative">
+      <div className="mx-auto flex min-h-[calc(100vh-5px)] w-full max-w-md flex-col justify-center px-4 py-8 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[max(1.25rem,env(safe-area-inset-top))]">
+        <section className="animate-fade-up overflow-hidden rounded-[28px] bg-card shadow-[0_18px_50px_rgba(11,46,89,0.12)] ring-1 ring-white/80">
+          <div className="relative overflow-hidden bg-gradient-to-br from-[#0b2e59] via-[#0a4a86] to-[#005daa] px-6 pb-6 pt-7 text-white">
+            <div className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
             <VNUKWordmark size="lg" onDark />
-            <p className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-white/70">
-              VNUK ParkWise · The Silent Gate
-            </p>
-            <h1 className="mt-5 text-[28px] font-semibold leading-tight tracking-tight text-white">
-              Campus parking on Zalo
+            <h1 className="relative mt-5 text-[28px] font-semibold tracking-tight">
+              ParkWise
             </h1>
-            <p className="mt-3 text-sm leading-relaxed text-white/80">
-              Đăng nhập bằng số điện thoại Zalo để mở cổng, Backup Pass và Kill-Switch.
+            <p className="relative mt-1.5 text-[14px] leading-relaxed text-white/75">
+              Cùng tài khoản web VNUK. Đăng nhập bằng số điện thoại Zalo.
             </p>
-            <div className="mt-5 grid grid-cols-3 gap-2">
-              {[
-                { label: "Access", value: "RFID + QR" },
-                { label: "ID", value: hasRealAppId ? "Live" : "Demo" },
-                { label: "Campus", value: "VNUK" },
-              ].map((item) => (
-                <div
-                  key={item.label}
-                  className="rounded-[14px] border border-white/15 bg-white/10 px-2.5 py-2.5"
-                >
-                  <p className="text-[10px] uppercase tracking-wide text-white/65">
-                    {item.label}
-                  </p>
-                  <p className="mt-0.5 truncate text-xs font-semibold text-white">
-                    {item.value}
-                  </p>
-                </div>
-              ))}
-            </div>
           </div>
-        </section>
 
-        <section className="animate-fade-up-delay-1 relative z-10 rounded-[24px] border border-border/80 bg-white p-6 shadow-[var(--shadow-soft)]">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-red">
-            Welcome back
-          </p>
-          <h2 className="mt-2 text-[28px] font-semibold tracking-tight text-navy">
-            Sign in
-          </h2>
-          <p className="mt-2 text-sm leading-relaxed text-muted">
-            Same ParkWise look as the web app — identify with your Zalo phone number.
-          </p>
-
-          {error ? (
-            <p className="mt-4 rounded-[12px] border border-red-200 bg-[#fef2f2] px-3 py-2.5 text-xs text-[#b91c1c]">
-              {error}
+          <div className="px-6 py-6">
+            <p className="mb-4 text-[12px] font-medium text-muted">
+              {hasRealAppId ? "Mini App · live" : "Trình duyệt · demo SĐT"}
             </p>
-          ) : null}
+            {error ? (
+              <p className="mb-4 rounded-[12px] border border-brand-red/25 bg-[#fdf2f4] px-3 py-2.5 text-[12px] text-brand-red">
+                {error}
+              </p>
+            ) : null}
 
-          <label className="mt-5 block">
-            <span className="mb-1.5 block text-xs font-medium text-muted">
-              Demo phone (browser preview)
-            </span>
-            <div className="rounded-[14px] border border-border bg-white p-3.5 focus-within:border-brand-blue/40 focus-within:ring-4 focus-within:ring-[rgba(0,93,170,0.12)]">
+            <label className="block">
+              <span className="mb-1.5 block text-[12px] font-medium text-muted">
+                SĐT demo (khi mở ngoài Zalo)
+              </span>
               <input
                 value={demoPhone}
                 onChange={(e) => setDemoPhone(e.target.value)}
                 inputMode="tel"
                 placeholder="0898466842"
-                className="w-full bg-transparent text-sm text-navy outline-none placeholder:text-muted/70"
+                className="field-input font-mono"
               />
-            </div>
-          </label>
+            </label>
 
-          <Button
-            type="button"
-            disabled={loading}
-            onClick={handleZaloPhoneLogin}
-            className="mt-4 w-full"
-          >
-            {loading ? "Đang xác thực SĐT…" : "Đăng nhập bằng SĐT Zalo"}
-          </Button>
-          <p className="mt-3 text-center text-[11px] text-muted">
-            Trong Zalo: cho phép chia sẻ số điện thoại
-          </p>
+            <Button
+              type="button"
+              disabled={loading}
+              onClick={handleZaloPhoneLogin}
+              className="mt-4 w-full rounded-[14px]"
+            >
+              {loading ? "Đang xác thực…" : "Đăng nhập bằng SĐT Zalo"}
+            </Button>
+            <p className="mt-3 text-center text-[12px] leading-relaxed text-muted">
+              Trong Zalo: cho phép chia sẻ số điện thoại khi được hỏi.
+            </p>
+          </div>
         </section>
       </div>
     </div>

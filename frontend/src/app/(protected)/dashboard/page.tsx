@@ -9,6 +9,7 @@ import { RewardsSnapshot } from "@/components/dashboard/rewards-snapshot";
 import { WeatherForecastBar } from "@/components/dashboard/weather-forecast-bar";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
 import { MobileAppHeader } from "@/components/layout/mobile-app-header";
+import { QrThemePicker } from "@/components/qr/qr-theme-picker";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useMembership } from "@/context/membership-context";
@@ -75,7 +76,10 @@ export default function DashboardPage() {
           <h1 className="text-[30px] font-semibold tracking-tight text-navy md:text-[34px]">
             {timeOfDayGreeting(user.name)}
           </h1>
-          <ClaimCorner />
+          <div className="flex items-center gap-2">
+            <QrThemePicker />
+            <ClaimCorner />
+          </div>
         </header>
 
         {/* Parking hero */}

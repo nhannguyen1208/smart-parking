@@ -1,196 +1,178 @@
 import { useEffect, useState } from "react";
 import AccentBar from "../components/AccentBar";
+import NightOwlMap from "../components/NightOwlMap";
 import { api } from "../lib/api";
 import {
   isDemoToken,
   loadDemoSession,
-  tickDemoSession,
+  sessionRiderName,
+  setDemoProgress,
 } from "../lib/night-owl-demo";
+
+/** Full campus→home run duration for legacy local demo tokens */
+const DEMO_RIDE_MS = 28_000;
 
 export default function Track({ token, onBack }) {
   const [session, setSession] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [progress, setProgress] = useState(0);
   const demo = isDemoToken(token);
+  const hasRoute = Array.isArray(session?.route) && session.route.length >= 2;
 
   useEffect(() => {
     let alive = true;
+    let raf = 0;
 
-    async function load() {
-      if (demo) {
-        const next = tickDemoSession(token) || loadDemoSession(token);
-        if (!alive) return;
-        if (!next) {
-          setError("Demo session not found — start Night-Owl again from Home.");
-          setSession(null);
-        } else {
-          setSession(next);
+    if (!demo) {
+      async function load() {
+        try {
+          const data = await api.getSafeRide(token);
+          if (!alive) return;
+          const s = data.session;
+          setSession(s);
+          setProgress(typeof s.progress === "number" ? s.progress : 0);
           setError("");
+        } catch (err) {
+          if (!alive) return;
+          setError(err.message || "Không tìm thấy chuyến");
+        } finally {
+          if (alive) setLoading(false);
         }
-        setLoading(false);
-        return;
       }
-
-      try {
-        const data = await api.getSafeRide(token);
-        if (!alive) return;
-        setSession(data.session);
-        setError("");
-      } catch (err) {
-        if (!alive) return;
-        setError(err.message || "Session not found");
-      } finally {
-        if (alive) setLoading(false);
-      }
+      load();
+      const id = window.setInterval(load, 3000);
+      return () => {
+        alive = false;
+        window.clearInterval(id);
+      };
     }
 
-    load();
-    const id = window.setInterval(load, demo ? 3500 : 8000);
+    const existing = loadDemoSession(token);
+    if (!existing) {
+      setError("Phiên demo không còn — mở Night-Owl và gửi link mới.");
+      setLoading(false);
+      return () => {
+        alive = false;
+      };
+    }
+
+    const startProgress = existing.progress || 0;
+    setSession(existing);
+    setProgress(startProgress);
+    setLoading(false);
+
+    if (startProgress >= 1 || existing.status === "EXPIRED") {
+      return () => {
+        alive = false;
+      };
+    }
+
+    const t0 = performance.now();
+    const remain = (1 - startProgress) * DEMO_RIDE_MS;
+
+    function frame(now) {
+      if (!alive) return;
+      const elapsed = now - t0;
+      const next = Math.min(
+        1,
+        startProgress + (elapsed / remain) * (1 - startProgress),
+      );
+      setProgress(next);
+      const updated = setDemoProgress(token, next);
+      if (updated) setSession(updated);
+      if (next < 1) raf = requestAnimationFrame(frame);
+    }
+
+    raf = requestAnimationFrame(frame);
     return () => {
       alive = false;
-      window.clearInterval(id);
+      cancelAnimationFrame(raf);
     };
   }, [token, demo]);
 
-  const path = session?.path || [];
-  const progress =
-    path.length > 1 ? Math.min(100, ((path.length - 1) / 4) * 100) : 8;
+  const titleFrom = session?.startLabel || session?.start?.label;
+  const titleTo = session?.destLabel || session?.destination?.label;
 
   return (
-    <div className="page-atmosphere min-h-screen text-navy">
+    <div className="page-atmosphere min-h-screen text-ink">
       <AccentBar />
       <div className="mx-auto max-w-md px-5 pb-10 pt-[max(1.25rem,env(safe-area-inset-top))]">
-        <button
-          type="button"
-          onClick={onBack}
-          className="mb-6 text-sm font-medium text-muted"
-        >
-          ← Back
-        </button>
+        {onBack ? (
+          <button
+            type="button"
+            onClick={onBack}
+            className="mb-5 text-[13px] font-medium text-muted"
+          >
+            ← Quay lại
+          </button>
+        ) : null}
 
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-blue">
-          Night-Owl Safe Ride
-        </p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-navy">
-          {demo ? "Demo track" : "Live track"}
+        <h1 className="text-[22px] font-semibold tracking-tight text-ink">
+          Theo dõi Night-Owl
         </h1>
-        {demo ? (
-          <p className="mt-1 text-xs text-muted">
-            Static preview — location advances along a campus path.
+        {titleFrom || titleTo ? (
+          <p className="mt-1 text-[13px] text-muted">
+            {titleFrom || "Xuất phát"} → {titleTo || "điểm đến"}
           </p>
         ) : null}
 
         {loading ? (
-          <p className="mt-8 text-sm text-muted">Loading session…</p>
+          <p className="mt-8 text-[13px] text-muted">Đang tải bản đồ…</p>
         ) : error ? (
-          <p className="mt-8 rounded-[12px] border border-red-200 bg-[#fef2f2] px-3 py-2 text-sm text-[#b91c1c]">
+          <p className="mt-8 border border-brand-red/30 bg-[#fdf2f4] px-3 py-2 text-[13px] text-brand-red">
             {error}
           </p>
         ) : (
-          <div className="mt-8 space-y-4">
-            <div
-              className="relative overflow-hidden rounded-[18px] px-4 py-5 text-white"
-              style={{
-                background:
-                  "linear-gradient(160deg, #0b2e59 0%, #0a3d73 48%, #102a44 100%)",
-              }}
-            >
-              <div className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
-              <div className="relative flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/65">
-                    Rider
-                  </p>
-                  <p className="mt-1.5 font-mono text-xl tracking-[0.12em]">
-                    {session.plate || "—"}
-                  </p>
-                </div>
-                <span
-                  className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ${
-                    session.status === "ACTIVE" || session.status === "ARRIVING"
-                      ? "bg-emerald-400/20 text-emerald-100 ring-emerald-300/30"
-                      : "bg-white/10 text-white/80 ring-white/20"
-                  }`}
-                >
-                  {session.status}
-                </span>
+          <div className="mt-5 space-y-3">
+            {hasRoute ? (
+              <NightOwlMap
+                progress={progress}
+                riderName={sessionRiderName(session)}
+                route={session.route}
+              />
+            ) : null}
+
+            <div className="flex items-start justify-between gap-3 border border-line bg-ink px-4 py-4 text-white">
+              <div>
+                <p className="text-[12px] text-white/65">Người đi</p>
+                <p className="mt-1 text-[18px] font-semibold">
+                  {sessionRiderName(session)}
+                </p>
               </div>
-              <div className="relative mt-5">
-                <div className="mb-2 flex justify-between text-[11px] text-white/70">
-                  <span>Campus</span>
-                  <span>Home</span>
-                </div>
-                <div className="h-2 overflow-hidden rounded-full bg-white/20">
-                  <div
-                    className="h-full rounded-full bg-white transition-[width] duration-700"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
-              </div>
+              <span className="border border-white/25 px-2 py-1 text-[11px] font-medium text-white/90">
+                {session.status}
+              </span>
             </div>
 
-            <div className="rounded-[16px] border border-border/80 bg-card p-4 shadow-[var(--shadow-card)]">
-              <p className="text-[11px] uppercase tracking-wide text-muted">
-                Session
+            <div className="border border-line bg-card p-4">
+              <p className="text-[12px] text-muted">Tiến độ</p>
+              <p className="mt-2 text-[20px] font-semibold tabular-nums text-ink">
+                {Math.round((progress || 0) * 100)}%
               </p>
-              <p className="mt-2 text-xs text-muted">
-                Started{" "}
-                {session.startedAt
-                  ? new Date(session.startedAt).toLocaleTimeString()
-                  : "—"}
-              </p>
-              <p className="mt-1 text-xs text-muted">
-                Expires {new Date(session.expiresAt).toLocaleString()}
+              <p className="mt-2 text-[12px] text-muted">
+                Hết hạn {new Date(session.expiresAt).toLocaleString()}
               </p>
             </div>
 
-            <div className="rounded-[16px] border border-brand-blue/20 bg-brand-light/40 p-4">
-              <p className="text-[11px] uppercase tracking-wide text-brand-blue">
-                Last location
-              </p>
+            <div className="border border-line bg-wash p-4">
+              <p className="text-[12px] text-muted">Vị trí gần nhất</p>
               {session.lastLocation ? (
                 <>
-                  <p className="mt-2 font-mono text-sm text-navy">
+                  <p className="mt-2 font-mono text-[13px] text-ink">
                     {Number(session.lastLocation.latitude).toFixed(5)},{" "}
                     {Number(session.lastLocation.longitude).toFixed(5)}
                   </p>
-                  <p className="mt-1 text-xs text-muted">
+                  <p className="mt-1 text-[12px] text-muted">
                     {session.lastLocation.at
                       ? new Date(session.lastLocation.at).toLocaleString()
                       : ""}
                   </p>
                 </>
               ) : (
-                <p className="mt-2 text-sm text-muted">Waiting for first ping…</p>
+                <p className="mt-2 text-[13px] text-muted">Chưa có ping…</p>
               )}
             </div>
-
-            {demo && path.length > 0 ? (
-              <div className="rounded-[16px] border border-border/80 bg-card p-4 shadow-[var(--shadow-card)]">
-                <p className="text-[11px] uppercase tracking-wide text-muted">
-                  Path pings
-                </p>
-                <ul className="mt-2 space-y-1.5">
-                  {path.map((p, i) => (
-                    <li
-                      key={`${p.at}-${i}`}
-                      className="flex justify-between gap-2 font-mono text-[11px] text-navy"
-                    >
-                      <span>
-                        {p.latitude.toFixed(4)}, {p.longitude.toFixed(4)}
-                      </span>
-                      <span className="text-muted">
-                        {new Date(p.at).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          second: "2-digit",
-                        })}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
           </div>
         )}
       </div>

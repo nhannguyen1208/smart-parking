@@ -13,6 +13,15 @@ import {
   RfidCredential,
   toPublicRfid,
 } from "../../models/RfidCredential.js";
+import {
+  cancelRfidCapture,
+  EnrollError,
+  enrollRfidCard,
+  getRfidCapture,
+  onDeviceCredentialScanned,
+  startRfidCapture,
+  toPublicCapture,
+} from "../../services/rfid-enrollment.service.js";
 import { ParkingLot, toPublicLot } from "../../models/ParkingLot.js";
 import { ParkingSession, toPublicSession } from "../../models/ParkingSession.js";
 import { SOSRequest } from "../../models/SOSRequest.js";
@@ -25,6 +34,7 @@ import {
 import { getActiveMembership } from "../../services/dashboard.service.js";
 import {
   closeSessionManually,
+  emitGateScanProcessed,
   processGateEvent,
   reconcileOccupancy,
 } from "../../services/parking.service.js";
@@ -46,6 +56,7 @@ import {
   RfidCredentialStatus,
   SosStatus,
   UserRole,
+  UserStatus,
   VehicleStatus,
 } from "../../types/enums.js";
 import { sendError, sendSuccess } from "../../utils/apiResponse.js";
@@ -62,6 +73,138 @@ export function createV1Router() {
     sendSuccess(res, { ready: true, demoMode: isDemoMode() });
   });
 
+  /**
+   * Physical ESP32 / gate reader → ParkWise web.
+   * Header: X-Device-Key: <DEVICE_API_KEY>
+   * Body: { eventId, gateId|gateCode, eventType, credentialRef|credentialRaw, ... }
+   */
+  router.post(
+    "/device/gate-events",
+    asyncHandler(async (req, res) => {
+      const expected = env.DEVICE_API_KEY?.trim() || "";
+      const got = String(req.header("x-device-key") || req.body?.deviceKey || "");
+      if (expected) {
+        if (got !== expected) {
+          return sendError(res, "UNAUTHORIZED", "Invalid or missing X-Device-Key", 401);
+        }
+      } else if (!isDemoMode()) {
+        return sendError(
+          res,
+          "UNAUTHORIZED",
+          "Set DEVICE_API_KEY on the API host",
+          401,
+        );
+      }
+
+      const rawType = String(req.body?.eventType || "AUTO").toUpperCase();
+      const eventType =
+        rawType === "EXIT" ? "EXIT" : rawType === "ENTRY" ? "ENTRY" : "AUTO";
+      const gateCode = String(
+        req.body?.gateCode ||
+          req.body?.gateId ||
+          (eventType === "EXIT" ? "GATE_A_OUT" : "GATE_A_IN"),
+      ).toUpperCase();
+      const credentialRaw = String(
+        req.body?.credentialRaw || req.body?.credentialRef || "",
+      ).trim();
+      const eventId = String(
+        req.body?.eventId || `esp32_${randomBytes(12).toString("hex")}`,
+      );
+      const plateNumber = req.body?.plateNumber
+        ? String(req.body.plateNumber)
+        : undefined;
+      const occurredAt = req.body?.occurredAt
+        ? String(req.body.occurredAt)
+        : undefined;
+
+      if (!credentialRaw && !plateNumber) {
+        return sendError(
+          res,
+          "VALIDATION_ERROR",
+          "credentialRef / credentialRaw (or plateNumber) required",
+          400,
+        );
+      }
+
+      // Guard đang bấm "Quét thẻ" → chỉ gắn UID, không check-in/mở barie
+      if (credentialRaw) {
+        const enrollCapture = await onDeviceCredentialScanned(credentialRaw);
+        if (enrollCapture.card || enrollCapture.enrolledForGuard) {
+          emitGateScanProcessed({
+            result: enrollCapture.card ? "ENROLLED" : "ENROLL_ERROR",
+            eventId,
+            gateCode,
+            credentialRef: credentialRaw,
+            enrolled: Boolean(enrollCapture.card),
+            enrolledCard: enrollCapture.card ?? null,
+            source: "REAL_DEVICE",
+            at: new Date().toISOString(),
+          });
+          return sendSuccess(res, {
+            ok: Boolean(enrollCapture.card),
+            result: enrollCapture.card ? "ENROLLED" : "ENROLL_ERROR",
+            reason: enrollCapture.card
+              ? "Card registered — scan again to check-in"
+              : "Enrollment failed — see Guard UI",
+            openBarrier: false,
+            enrolled: Boolean(enrollCapture.card),
+            enrolledCard: enrollCapture.card ?? null,
+            eventId,
+            gateCode,
+            eventType: "ENTRY",
+          });
+        }
+      }
+
+      const result = await processGateEvent({
+        eventId,
+        gateCode,
+        eventType,
+        credentialRaw: credentialRaw || undefined,
+        plateNumber,
+        occurredAt,
+        source: GateEventSource.REAL_DEVICE,
+      });
+
+      const resolvedType = result.eventType || (eventType === "EXIT" ? "EXIT" : "ENTRY");
+
+      emitGateScanProcessed({
+        ...result,
+        eventId,
+        gateCode,
+        eventType: resolvedType,
+        credentialRef: credentialRaw || undefined,
+        source: "REAL_DEVICE",
+        at: new Date().toISOString(),
+      });
+
+      sendSuccess(res, {
+        ...result,
+        openBarrier: result.result === "ALLOWED",
+        eventId,
+        gateCode,
+        eventType: resolvedType,
+      });
+    }),
+  );
+
+  router.get(
+    "/device/ping",
+    asyncHandler(async (req, res) => {
+      const expected = env.DEVICE_API_KEY?.trim() || "";
+      const got = String(req.header("x-device-key") || "");
+      if (expected && got !== expected) {
+        return sendError(res, "UNAUTHORIZED", "Invalid X-Device-Key", 401);
+      }
+      sendSuccess(res, {
+        ok: true,
+        demoMode: isDemoMode(),
+        mqttEnabled: env.MQTT_ENABLED,
+        message: "ParkWise device API reachable",
+      });
+    }),
+  );
+
   // ── Auth extras ──────────────────────────────────────────
   router.post(
     "/auth/demo-login",
@@ -69,7 +212,7 @@ export function createV1Router() {
       if (!isDemoMode()) {
         return sendError(res, "FORBIDDEN", "demo-login disabled outside DEMO_MODE", 403);
       }
-      const studentId = String(req.body?.studentId || "STU-NHI");
+      const studentId = String(req.body?.studentId || "22040002");
       const user = await User.findOne({ studentId }).select("+passwordHash");
       if (!user) return sendError(res, "NOT_FOUND", "Demo user not found — run seed", 404);
       const { signToken, setAuthCookie } = await import("../../utils/jwt.js");
@@ -108,8 +251,26 @@ export function createV1Router() {
     "/student/parking-lots",
     authenticate,
     asyncHandler(async (_req, res) => {
+      const {
+        ensureUniversityDaNangLots,
+        CAMPUS_MAP_CENTER,
+        footprintByCode,
+      } = await import("../../services/campus-lots.service.js");
+      await ensureUniversityDaNangLots();
       const lots = await ParkingLot.find().sort({ code: 1 });
-      sendSuccess(res, lots.map(toPublicLot));
+      sendSuccess(res, {
+        campus: CAMPUS_MAP_CENTER,
+        lots: lots.map((lot) => ({
+          ...toPublicLot(lot),
+          footprint: footprintByCode(lot.code),
+        })),
+        legend: [
+          { status: "AVAILABLE", label: "Còn chỗ", color: "#16a34a" },
+          { status: "NEARLY_FULL", label: "Sắp đầy", color: "#d97706" },
+          { status: "FULL", label: "Hết chỗ", color: "#dc2626" },
+        ],
+        updatedAt: new Date().toISOString(),
+      });
     }),
   );
 
@@ -181,38 +342,39 @@ export function createV1Router() {
       if (env.FEATURE_KILL_SWITCH === "false") {
         return sendError(res, "DISABLED", "Kill-Switch feature flag off", 403);
       }
-      const vehicleId = req.body?.vehicleId as string | undefined;
       const disable = req.body?.disable !== false;
-      const vehicle = vehicleId
-        ? await Vehicle.findOne({ _id: vehicleId, ownerId: req.user!._id })
-        : await Vehicle.findOne({ ownerId: req.user!._id, primary: true });
-      if (!vehicle) return sendError(res, "NOT_FOUND", "Vehicle not found", 404);
-
-      vehicle.status = disable ? VehicleStatus.DISABLED : VehicleStatus.ACTIVE;
-      await vehicle.save();
 
       await RfidCredential.updateMany(
-        { ownerId: req.user!._id, vehicleId: vehicle._id },
+        {
+          ownerId: req.user!._id,
+          status: {
+            $in: disable
+              ? [RfidCredentialStatus.ACTIVE]
+              : [RfidCredentialStatus.SUSPENDED],
+          },
+        },
         {
           status: disable
             ? RfidCredentialStatus.SUSPENDED
             : RfidCredentialStatus.ACTIVE,
-          revokeReason: disable ? "Kill-Switch: ParkWise access disabled by student" : "",
+          revokeReason: disable
+            ? "Kill-Switch: ParkWise access disabled by student"
+            : "",
         },
       );
 
       await writeAudit({
         actorId: req.user!._id,
         action: disable ? "KILL_SWITCH_ON" : "KILL_SWITCH_OFF",
-        targetType: "Vehicle",
-        targetId: vehicle._id.toString(),
+        targetType: "User",
+        targetId: req.user!._id.toString(),
         reason: "Student toggle — disables ParkWise gate access only",
       });
 
       sendSuccess(res, {
-        vehicle: toPublicVehicle(vehicle),
+        locked: disable,
         message: disable
-          ? "ParkWise access disabled (does not immobilize the motorcycle)"
+          ? "ParkWise access disabled (RFID denied at gate)"
           : "ParkWise access restored",
       });
     }),
@@ -451,13 +613,199 @@ export function createV1Router() {
     }),
   );
 
+  /** Search students for RFID enrollment (thẻ gắn MSSV — không lấy xe/biển số) */
+  router.get(
+    "/guard/students",
+    authenticate,
+    requireRoles(UserRole.GUARD, UserRole.ADMIN),
+    asyncHandler(async (req, res) => {
+      const q = String(req.query.q || "").trim();
+      const filter: Record<string, unknown> = {
+        role: UserRole.STUDENT,
+        status: { $ne: UserStatus.SUSPENDED },
+      };
+      if (q) {
+        filter.$or = [
+          { studentId: new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i") },
+          { name: new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i") },
+          { email: new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i") },
+        ];
+      }
+      const users = await User.find(filter).sort({ studentId: 1 }).limit(30);
+      const ownerIds = users.map((u) => u._id);
+      const creds = await RfidCredential.find({ ownerId: { $in: ownerIds } });
+      sendSuccess(
+        res,
+        users.map((u) => {
+          const uc = creds.filter((c) => c.ownerId.equals(u._id));
+          return {
+            ...toPublicUser(u),
+            rfidCards: uc.map((c) => ({
+              id: c._id.toString(),
+              displaySuffix: c.displaySuffix,
+              status: c.status,
+            })),
+          };
+        }),
+      );
+    }),
+  );
+
+  /** List RFID cards (Guard) */
+  router.get(
+    "/guard/rfid",
+    authenticate,
+    requireRoles(UserRole.GUARD, UserRole.ADMIN),
+    asyncHandler(async (_req, res) => {
+      const creds = await RfidCredential.find()
+        .sort({ updatedAt: -1 })
+        .limit(100);
+      const ownerIds = [...new Set(creds.map((c) => c.ownerId.toString()))];
+      const users = await User.find({ _id: { $in: ownerIds } });
+      const byId = new Map(users.map((u) => [u._id.toString(), u]));
+      sendSuccess(
+        res,
+        creds.map((c) => {
+          const owner = byId.get(c.ownerId.toString());
+          return {
+            ...toPublicRfid(c),
+            studentId: owner?.studentId ?? "",
+            studentName: owner?.name ?? "",
+          };
+        }),
+      );
+    }),
+  );
+
+  /** Unknown UIDs from recent physical scans (needs registration) */
+  router.get(
+    "/guard/rfid/unknown",
+    authenticate,
+    requireRoles(UserRole.GUARD, UserRole.ADMIN),
+    asyncHandler(async (_req, res) => {
+      const events = await GateEvent.find({
+        result: "REVIEW",
+        "metadata.needsRegistration": true,
+      })
+        .sort({ occurredAt: -1 })
+        .limit(20);
+      const seen = new Set<string>();
+      const items: Array<{
+        credentialRaw: string;
+        eventId: string;
+        occurredAt: Date;
+        reason: string;
+      }> = [];
+      for (const ev of events) {
+        const raw = String(
+          (ev.metadata as { credentialRaw?: string })?.credentialRaw || "",
+        ).toUpperCase();
+        if (!raw || seen.has(raw)) continue;
+        seen.add(raw);
+        items.push({
+          credentialRaw: raw,
+          eventId: ev.eventId,
+          occurredAt: ev.occurredAt,
+          reason: ev.reason,
+        });
+      }
+      sendSuccess(res, items);
+    }),
+  );
+
+  /** Register / bind physical RFID UID to a student (MSSV) */
+  router.post(
+    "/guard/rfid/register",
+    authenticate,
+    requireRoles(UserRole.GUARD, UserRole.ADMIN),
+    asyncHandler(async (req: AuthenticatedRequest, res) => {
+      try {
+        const card = await enrollRfidCard({
+          rawToken: String(req.body?.rawToken || req.body?.credentialRaw || ""),
+          studentId: String(req.body?.studentId || ""),
+          replace: Boolean(req.body?.replace),
+          actorId: req.user!._id.toString(),
+        });
+        sendSuccess(res, card, card.reassigned ? 200 : 201);
+      } catch (err) {
+        if (err instanceof EnrollError) {
+          return sendError(res, err.code, err.message, err.status);
+        }
+        throw err;
+      }
+    }),
+  );
+
+  /**
+   * Bấm Quét trên web → chờ ESP32 quét → tự gắn thẻ cho student đã chọn.
+   * Poll GET /guard/rfid/await-scan đến status=registered|error|expired
+   */
+  router.post(
+    "/guard/rfid/await-scan",
+    authenticate,
+    requireRoles(UserRole.GUARD, UserRole.ADMIN),
+    asyncHandler(async (req: AuthenticatedRequest, res) => {
+      const studentId = String(req.body?.studentId || "").trim();
+      if (!studentId) {
+        return sendError(res, "VALIDATION_ERROR", "studentId required", 400);
+      }
+      const student = await User.findOne({
+        studentId,
+        role: UserRole.STUDENT,
+      });
+      if (!student) {
+        return sendError(res, "NOT_FOUND", "Student not found", 404);
+      }
+      const session = startRfidCapture({
+        guardId: req.user!._id.toString(),
+        studentId,
+        replace: req.body?.replace !== false,
+      });
+      sendSuccess(res, {
+        ...toPublicCapture(session),
+        message: "Đang chờ quét thẻ trên ESP32 (60 giây)…",
+      });
+    }),
+  );
+
+  router.get(
+    "/guard/rfid/await-scan",
+    authenticate,
+    requireRoles(UserRole.GUARD, UserRole.ADMIN),
+    asyncHandler(async (req: AuthenticatedRequest, res) => {
+      const session = getRfidCapture(req.user!._id.toString());
+      if (!session) {
+        return sendSuccess(res, {
+          status: "idle",
+          message: "Chưa bấm Quét thẻ",
+        });
+      }
+      sendSuccess(res, toPublicCapture(session));
+    }),
+  );
+
+  router.delete(
+    "/guard/rfid/await-scan",
+    authenticate,
+    requireRoles(UserRole.GUARD, UserRole.ADMIN),
+    asyncHandler(async (req: AuthenticatedRequest, res) => {
+      cancelRfidCapture(req.user!._id.toString());
+      sendSuccess(res, { ok: true });
+    }),
+  );
+
   router.post(
     "/guard/scan",
     authenticate,
     requireRoles(UserRole.GUARD, UserRole.ADMIN),
     asyncHandler(async (req: AuthenticatedRequest, res) => {
-      const eventType = req.body?.eventType === "EXIT" ? "EXIT" : "ENTRY";
-      const gateCode = String(req.body?.gateCode || "GATE_A_IN");
+      const rawType = String(req.body?.eventType || "ENTRY").toUpperCase();
+      const eventType =
+        rawType === "EXIT" ? "EXIT" : rawType === "AUTO" ? "AUTO" : "ENTRY";
+      const gateCode = String(
+        req.body?.gateCode ||
+          (eventType === "EXIT" ? "GATE_A_OUT" : "GATE_A_IN"),
+      );
       const credentialRaw = req.body?.credentialRaw
         ? String(req.body.credentialRaw)
         : undefined;
@@ -525,8 +873,9 @@ export function createV1Router() {
         });
       }
 
+      const eventId = `demo_${randomBytes(12).toString("hex")}`;
       const result = await processGateEvent({
-        eventId: `demo_${randomBytes(12).toString("hex")}`,
+        eventId,
         gateCode,
         eventType,
         credentialRaw,
@@ -534,7 +883,23 @@ export function createV1Router() {
         source: GateEventSource.DEMO,
         actorId: req.user!._id.toString(),
       });
-      sendSuccess(res, { ...result, source: "DEMO", labelledDemo: true });
+      const resolvedType =
+        result.eventType || (eventType === "EXIT" ? "EXIT" : "ENTRY");
+      emitGateScanProcessed({
+        ...result,
+        eventId,
+        gateCode,
+        eventType: resolvedType,
+        credentialRef: credentialRaw,
+        source: "DEMO",
+        at: new Date().toISOString(),
+      });
+      sendSuccess(res, {
+        ...result,
+        eventType: resolvedType,
+        source: "DEMO",
+        labelledDemo: true,
+      });
     }),
   );
 

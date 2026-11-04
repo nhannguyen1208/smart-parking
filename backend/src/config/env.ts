@@ -22,6 +22,8 @@ const envSchema = z.object({
     .string()
     .optional()
     .transform((v) => v === "true" || v === "1"),
+  /** Shared secret for ESP32 / physical readers → POST /api/v1/device/gate-events */
+  DEVICE_API_KEY: z.string().optional().default("parkwise-device"),
   PAYMENT_PROVIDER: z.string().default("mock"),
   LPR_PROVIDER: z.string().default("mock"),
   LMS_PROVIDER: z.string().default("mock"),

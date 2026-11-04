@@ -27,7 +27,7 @@ const tabs: Tab[] = [
   },
   {
     href: "/parking",
-    label: "Parking",
+    label: "Radar",
     icon: CarFront,
   },
   {

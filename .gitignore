@@ -40,6 +40,10 @@ yarn-error.log*
 /cloudflared/config.yml
 /cloudflared/tunnel.json
 
+# ESP32 local WiFi/MQTT secrets + PlatformIO build/deps
+/firmware/**/secrets.h
+/firmware/**/.pio/
+
 .vercel
 
 *.tsbuildinfo

@@ -1,6 +1,6 @@
 import { clearSession, getToken } from "./auth";
 
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:5050";
+const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4000";
 
 async function request(path, options = {}) {
   const headers = {
@@ -43,16 +43,11 @@ export const api = {
       body: JSON.stringify(payload),
     }),
   me: () => request("/api/me"),
-  events: () => request("/api/events"),
+  parkingRadar: () => request("/api/v1/student/parking-lots"),
   lockVehicle: (locked) =>
     request("/api/lock-vehicle", {
       method: "POST",
-      body: JSON.stringify({ locked }),
-    }),
-  saveZone: (payload) =>
-    request("/api/save-zone", {
-      method: "POST",
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ locked: Boolean(locked) }),
     }),
   generateGuestPass: (payload) =>
     request("/api/generate-guest-pass", {
@@ -65,9 +60,9 @@ export const api = {
       body: JSON.stringify(payload),
     }),
   getSafeRide: (token) => request(`/api/safe-ride/${token}`),
-  updateSafeRideLocation: (token, coords) =>
+  updateSafeRideLocation: (token, payload) =>
     request(`/api/safe-ride/${token}/location`, {
       method: "POST",
-      body: JSON.stringify(coords),
+      body: JSON.stringify(payload),
     }),
 };

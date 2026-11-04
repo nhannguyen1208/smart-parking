@@ -4,6 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -58,7 +59,8 @@ export function MembershipProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const refreshMembership = useCallback(async () => {
-    setLoading(true);
+    // Only block UI on the first load — later refreshes keep current membership
+    if (!hydratedRef.current) setLoading(true);
     setError(null);
     try {
       if (!hydratedRef.current) {
@@ -77,6 +79,10 @@ export function MembershipProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     }
   }, [setActiveMembership]);
+
+  useEffect(() => {
+    void refreshMembership();
+  }, [refreshMembership]);
 
   const value = useMemo(
     () => ({

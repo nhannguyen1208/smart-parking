@@ -22,6 +22,9 @@ export async function updateProfile(req: AuthenticatedRequest, res: Response) {
   if (input.name !== undefined) user.name = input.name;
   if (input.vehicleNumber !== undefined) user.vehicleNumber = input.vehicleNumber;
   if (input.vehicleType !== undefined) user.vehicleType = input.vehicleType;
+  if (input.preferences?.qrTheme !== undefined) {
+    user.set("preferences.qrTheme", input.preferences.qrTheme);
+  }
 
   await user.save();
 

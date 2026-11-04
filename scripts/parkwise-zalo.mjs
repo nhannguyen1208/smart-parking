@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * One terminal for Zalo Mini App local backend:
- *   API :5050  +  Cloudflare HTTPS tunnel
+ * One terminal for Zalo Mini App:
+ *   Shared API :4000 (Mongo)  +  Cloudflare HTTPS tunnel
  *
  * Prefers named tunnel when cloudflared/config.yml exists
  * (see: npm run parkwise:tunnel:setup -- api.yourdomain.com).
@@ -62,9 +62,9 @@ process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);
 
 function startApi() {
-  log("Starting API on :5050 …");
+  log("Starting shared API on :4000 …");
   const api = spawn("npm", ["run", "dev"], {
-    cwd: path.join(root, "backend/parkwise-sqlite"),
+    cwd: path.join(root, "backend"),
     stdio: ["ignore", "pipe", "pipe"],
     env: process.env,
   });
@@ -120,7 +120,7 @@ function startQuickTunnel() {
 
   const tunnel = spawn(
     "npx",
-    ["--yes", "cloudflared", "tunnel", "--url", "http://127.0.0.1:5050"],
+    ["--yes", "cloudflared", "tunnel", "--url", "http://127.0.0.1:4000"],
     {
       cwd: root,
       stdio: ["ignore", "pipe", "pipe"],

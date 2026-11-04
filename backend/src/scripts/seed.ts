@@ -21,6 +21,7 @@ import { ParkingReward } from "../models/ParkingReward.js";
 import { RewardMission } from "../models/RewardMission.js";
 import { RewardRedemption } from "../models/RewardRedemption.js";
 import { RewardTransaction } from "../models/RewardTransaction.js";
+import { SafeRideSession } from "../models/SafeRideSession.js";
 import { SOSRequest } from "../models/SOSRequest.js";
 import { SystemSetting } from "../models/SystemSetting.js";
 import { User } from "../models/User.js";
@@ -61,20 +62,23 @@ async function seed() {
     RewardRedemption.deleteMany({}),
     SOSRequest.deleteMany({}),
     SystemSetting.deleteMany({}),
+    SafeRideSession.deleteMany({}),
   ]);
 
   const passwordHash = await bcrypt.hash("password123", 10);
 
-  const [nhi, tan, nghia, guard, admin] = await User.create([
+  const [nhan, tan, nghia, guard, admin] = await User.create([
     {
-      studentId: "STU-NHI",
-      name: "Phạm Trần Thảo Nhi",
-      email: "nhi.demo@vnuk.local",
+      studentId: "22040002",
+      name: "Nguyễn Minh Nhân",
+      email: "nhan.nguyen220402@vnuk.edu.vn",
       passwordHash,
       role: UserRole.STUDENT,
       status: UserStatus.ACTIVE,
-      vehicleNumber: "43B1-11111",
+      vehicleNumber: "59X1-12345",
       vehicleType: "Honda Vision",
+      phone: "84898466842",
+      zaloUserId: "zalo_demo_001",
     },
     {
       studentId: "STU-TAN",
@@ -117,35 +121,27 @@ async function seed() {
   const plans = await MembershipPlan.create([
     {
       name: "Daily pass",
-      description: "1 day campus parking — includes Backup Pass while active",
+      description: "",
       durationDays: 1,
       price: 10000,
-      features: [
-        "Campus parking access",
-        "RFID entry",
-        "Backup Pass (lost/forgot card — earns Rewards)",
-      ],
+      features: [],
       isActive: true,
     },
     {
       name: "Monthly pass",
-      description: "30 days campus parking — includes Backup Pass while active",
+      description: "",
       durationDays: 30,
       price: 30000,
-      features: [
-        "Campus parking access",
-        "RFID entry",
-        "Backup Pass (lost/forgot card — earns Rewards)",
-      ],
+      features: [],
       isActive: true,
     },
   ]);
 
-  // Nhi has monthly plan so Backup Pass works in demo; Tân/Nghĩa have none
+  // Nhân (Zalo demo twin) has monthly plan so Backup Pass works; Tân/Nghĩa have none
   const endDate = new Date();
   endDate.setDate(endDate.getDate() + 30);
   await Membership.create({
-    userId: nhi._id,
+    userId: nhan._id,
     planId: plans[1]._id,
     status: MembershipStatus.ACTIVE,
     startDate: new Date(),
@@ -154,9 +150,9 @@ async function seed() {
 
   const vehicles = await Vehicle.create([
     {
-      ownerId: nhi._id,
-      plateNumber: "43B1-11111",
-      plateNormalized: normalizePlate("43B1-11111"),
+      ownerId: nhan._id,
+      plateNumber: "59X1-12345",
+      plateNormalized: normalizePlate("59X1-12345"),
       make: "Honda Vision",
       color: "White",
       primary: true,
@@ -180,7 +176,7 @@ async function seed() {
   ]);
 
   const tags = [
-    { user: nhi, vehicle: vehicles[0], raw: "RFID-NHI-001" },
+    { user: nhan, vehicle: vehicles[0], raw: "RFID-A1B2C3" },
     { user: tan, vehicle: vehicles[1], raw: "RFID-TAN-001" },
     { user: nghia, vehicle: vehicles[2], raw: "RFID-NGHIA-001" },
   ];
@@ -197,21 +193,39 @@ async function seed() {
 
   const lots = await ParkingLot.create([
     {
-      name: "Lot A · Main Gate",
+      name: "Bãi Lê Duẩn",
       code: "LOT_A",
-      locationDescription: "Near library / main entrance",
-      totalCapacity: 40,
-      currentOccupancyEstimate: 28,
-      status: computeLotStatus(40, 28),
+      locationDescription: "Dọc Đường Lê Duẩn — cổng Bắc trụ sở ĐHĐN",
+      campus: "Đại học Đà Nẵng",
+      latitude: 16.07132,
+      longitude: 108.21972,
+      totalCapacity: 80,
+      currentOccupancyEstimate: 24,
+      status: computeLotStatus(80, 24),
       nearlyFullThresholdPct: 85,
     },
     {
-      name: "Lot B · Sports Hall",
+      name: "Bãi Lê Lợi",
       code: "LOT_B",
-      locationDescription: "Behind sports complex",
+      locationDescription: "Dọc Đường Lê Lợi — phía Đông ĐHĐN / cạnh VNUK",
+      campus: "Đại học Đà Nẵng",
+      latitude: 16.07095,
+      longitude: 108.22042,
+      totalCapacity: 100,
+      currentOccupancyEstimate: 89,
+      status: computeLotStatus(100, 89),
+      nearlyFullThresholdPct: 85,
+    },
+    {
+      name: "Bãi Nguyễn Thị Minh Khai",
+      code: "LOT_C",
+      locationDescription: "Dọc Đường Nguyễn Thị Minh Khai — phía Tây ĐHĐN",
+      campus: "Đại học Đà Nẵng",
+      latitude: 16.07085,
+      longitude: 108.21888,
       totalCapacity: 60,
-      currentOccupancyEstimate: 52,
-      status: computeLotStatus(60, 52),
+      currentOccupancyEstimate: 60,
+      status: computeLotStatus(60, 60),
       nearlyFullThresholdPct: 85,
     },
   ]);
@@ -219,7 +233,7 @@ async function seed() {
   await GateDevice.create([
     {
       code: "GATE_A_IN",
-      name: "Lot A Entry",
+      name: "Bãi Lê Duẩn Entry",
       lotId: lots[0]._id,
       type: "ENTRY",
       mode: GateDeviceMode.MOCK,
@@ -228,7 +242,7 @@ async function seed() {
     },
     {
       code: "GATE_A_OUT",
-      name: "Lot A Exit",
+      name: "Bãi Lê Duẩn Exit",
       lotId: lots[0]._id,
       type: "EXIT",
       mode: GateDeviceMode.MOCK,
@@ -237,8 +251,17 @@ async function seed() {
     },
     {
       code: "GATE_B_IN",
-      name: "Lot B Entry",
+      name: "Bãi Lê Lợi Entry",
       lotId: lots[1]._id,
+      type: "ENTRY",
+      mode: GateDeviceMode.MOCK,
+      enabled: true,
+      lastHeartbeatAt: new Date(),
+    },
+    {
+      code: "GATE_C_IN",
+      name: "Bãi Nguyễn Thị Minh Khai Entry",
+      lotId: lots[2]._id,
       type: "ENTRY",
       mode: GateDeviceMode.MOCK,
       enabled: true,
@@ -247,7 +270,7 @@ async function seed() {
   ]);
 
   await FeeRecord.create({
-    userId: nhi._id,
+    userId: nhan._id,
     amount: 5000,
     currency: "VND",
     feeType: "DAILY_SAMPLE",
@@ -344,7 +367,7 @@ async function seed() {
   ]);
 
   await RewardTransaction.create({
-    userId: nhi._id,
+    userId: nhan._id,
     points: 80,
     reason: "SEED_BONUS",
     description: "Welcome bonus (seed demo)",
@@ -353,11 +376,19 @@ async function seed() {
   });
 
   console.log("ParkWise seed complete (LOCAL DEMO ONLY)");
-  console.log("Students: STU-NHI / STU-TAN / STU-NGHIA — password: password123");
+  console.log(
+    "Students: 22040002 (Nguyễn Minh Nhân) / STU-TAN / STU-NGHIA — password: password123",
+  );
+  console.log("Primary email: nhan.nguyen220402@vnuk.edu.vn");
+  console.log(
+    "Zalo link: phone 84898466842 (0898466842) · zaloUserId zalo_demo_001",
+  );
   console.log("Guard: G-1001 or guard001@vnuk.local — password: password123");
   console.log("Admin: A-9001 or admin001@vnuk.local — password: password123");
-  console.log("RFID demo tags: RFID-NHI-001, RFID-TAN-001, RFID-NGHIA-001");
-  console.log("Rewards: Early Arrival 07:10–07:20 (+10) · Blind boxes · Nhi starts with 80 pts");
+  console.log("RFID demo tags: RFID-A1B2C3, RFID-TAN-001, RFID-NGHIA-001");
+  console.log(
+    "Rewards: Early Arrival 07:10–07:20 (+10) · Blind boxes · Nhân starts with 80 pts",
+  );
 
   await mongoose.disconnect();
 }

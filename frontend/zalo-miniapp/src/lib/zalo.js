@@ -2,7 +2,13 @@
  * Thin wrapper around zmp-sdk.
  * In browser demo (outside Zalo), APIs fail → caller falls back to demo login.
  */
-import { authorize, getAccessToken, getPhoneNumber, getUserInfo } from "zmp-sdk/apis";
+import {
+  authorize,
+  getAccessToken,
+  getPhoneNumber,
+  getUserInfo,
+  openShareSheet,
+} from "zmp-sdk/apis";
 
 export function getMiniAppId() {
   return (
@@ -54,4 +60,79 @@ export async function tryGetZaloPhoneToken() {
   } catch {
     return null;
   }
+}
+
+/**
+ * Share Night-Owl track with family via Zalo sheet.
+ * Prefer Mini App deep link so recipient opens /track/:token inside ParkWise.
+ */
+export async function shareTrackToZalo({
+  path,
+  title,
+  description,
+  link,
+  thumbnail,
+}) {
+  const thumb =
+    thumbnail ||
+    "https://stc-zmp.zadn.vn/zmp-docs/static/img/logo.b8f0e0a1.png";
+
+  // Prefer sharing the public web track URL (works for anyone in a browser)
+  if (link) {
+    try {
+      await openShareSheet({
+        type: "link",
+        data: { link, chatOnly: false },
+      });
+      return { ok: true, via: "link" };
+    } catch {
+      // fall through
+    }
+
+    try {
+      await openShareSheet({
+        type: "text",
+        data: {
+          text: `${title || "Night-Owl"}\n${description || ""}\n${link}`,
+          autoParseLink: true,
+        },
+      });
+      return { ok: true, via: "text" };
+    } catch {
+      // fall through
+    }
+
+    try {
+      const text = encodeURIComponent(description || title || "Night-Owl");
+      window.open(
+        `https://zalo.me/share?u=${encodeURIComponent(link)}&t=${text}`,
+        "_blank",
+        "noopener,noreferrer",
+      );
+      return { ok: true, via: "zalo.me" };
+    } catch {
+      // ignore
+    }
+  }
+
+  // Fallback: Mini App deep link (recipient needs Zalo + Mini App)
+  if (path) {
+    try {
+      await openShareSheet({
+        type: "zmp_deep_link",
+        data: {
+          title: title || "ParkWise Night-Owl",
+          description:
+            description || "Theo dõi vị trí trên bản đồ khi về nhà",
+          thumbnail: thumb,
+          path,
+        },
+      });
+      return { ok: true, via: "zmp_deep_link" };
+    } catch {
+      // ignore
+    }
+  }
+
+  return { ok: false };
 }

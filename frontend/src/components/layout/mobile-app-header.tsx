@@ -4,6 +4,7 @@ import Link from "next/link";
 import { UserRound } from "lucide-react";
 import { ClaimCorner } from "@/components/dashboard/claim-corner";
 import { VNUKWordmark } from "@/components/layout/vnuk-wordmark";
+import { QrThemePicker } from "@/components/qr/qr-theme-picker";
 import { useAuth } from "@/context/auth-context";
 import { firstName } from "@/lib/rewards-format";
 
@@ -12,6 +13,7 @@ type MobileAppHeaderProps = {
   subtitle?: string;
   showGreeting?: boolean;
   showClaim?: boolean;
+  showTheme?: boolean;
 };
 
 export function MobileAppHeader({
@@ -19,6 +21,7 @@ export function MobileAppHeader({
   subtitle,
   showGreeting = false,
   showClaim = false,
+  showTheme = true,
 }: MobileAppHeaderProps) {
   const { user } = useAuth();
   const name = user?.name ? firstName(user.name) : "there";
@@ -43,6 +46,7 @@ export function MobileAppHeader({
       </div>
       <div className="flex shrink-0 items-center gap-2">
         {showClaim ? <ClaimCorner /> : null}
+        {showTheme ? <QrThemePicker /> : null}
         <Link
           href="/profile"
           className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-navy shadow-[var(--shadow-card)] ring-1 ring-border active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue"

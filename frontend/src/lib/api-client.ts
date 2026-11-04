@@ -99,6 +99,7 @@ export const api = {
     name?: string;
     vehicleNumber?: string;
     vehicleType?: string;
+    preferences?: { qrTheme?: string };
   }) =>
     apiRequest<{ user: import("./types").User }>("/api/profile", {
       method: "PATCH",
@@ -128,16 +129,37 @@ export const api = {
   // VNUK ParkWise /api/v1
   v1: {
     studentDashboard: () => apiRequest<Record<string, unknown>>("/api/v1/student/dashboard"),
+    parkingRadar: () =>
+      apiRequest<{
+        campus: {
+          latitude: number;
+          longitude: number;
+          zoom: number;
+          label: string;
+        };
+        lots: Array<{
+          id: string;
+          name: string;
+          code: string;
+          locationDescription: string;
+          campus: string;
+          latitude: number | null;
+          longitude: number | null;
+          totalCapacity: number;
+          currentOccupancyEstimate: number;
+          availableEstimate: number;
+          fillPct: number;
+          status: string;
+          radarColor: string;
+          footprint?: [number, number][] | null;
+          updatedAt: string;
+        }>;
+        legend: Array<{ status: string; label: string; color: string }>;
+        updatedAt: string;
+      }>("/api/v1/student/parking-lots"),
     studentSessions: () => apiRequest<unknown[]>("/api/v1/student/sessions"),
     studentFees: () =>
       apiRequest<{ fees: unknown[]; labelledSample: boolean }>("/api/v1/student/fees"),
-    studentVehicles: () => apiRequest<unknown[]>("/api/v1/student/vehicles"),
-    studentRfid: () => apiRequest<unknown[]>("/api/v1/student/rfid-credentials"),
-    killSwitch: (payload: { vehicleId?: string; disable?: boolean }) =>
-      apiRequest<{ vehicle: unknown; message: string }>("/api/v1/student/kill-switch", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      }),
     createGuestPass: (payload?: { validMinutes?: number; lotId?: string }) =>
       apiRequest<{
         id: string;
@@ -214,6 +236,79 @@ export const api = {
       apiRequest<Record<string, unknown>>("/api/v1/guard/scan", {
         method: "POST",
         body: JSON.stringify(payload),
+      }),
+    guardSearchStudents: (q: string) =>
+      apiRequest<
+        Array<{
+          id: string;
+          studentId: string;
+          name: string;
+          email: string;
+          rfidCards: Array<{
+            id: string;
+            displaySuffix: string;
+            status: string;
+          }>;
+        }>
+      >(`/api/v1/guard/students?q=${encodeURIComponent(q)}`),
+    guardListRfid: () =>
+      apiRequest<
+        Array<{
+          id: string;
+          displaySuffix: string;
+          status: string;
+          studentId: string;
+          studentName: string;
+        }>
+      >("/api/v1/guard/rfid"),
+    guardUnknownRfid: () =>
+      apiRequest<
+        Array<{
+          credentialRaw: string;
+          eventId: string;
+          occurredAt: string;
+          reason: string;
+        }>
+      >("/api/v1/guard/rfid/unknown"),
+    guardRegisterRfid: (payload: {
+      rawToken: string;
+      studentId: string;
+      replace?: boolean;
+    }) =>
+      apiRequest<Record<string, unknown>>("/api/v1/guard/rfid/register", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+    guardStartAwaitScan: (payload: {
+      studentId: string;
+      replace?: boolean;
+    }) =>
+      apiRequest<{
+        status: string;
+        message?: string;
+        expiresAt?: string;
+        remainingMs?: number;
+      }>("/api/v1/guard/rfid/await-scan", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+    guardAwaitScanStatus: () =>
+      apiRequest<{
+        status: string;
+        studentId?: string;
+        credentialRaw?: string | null;
+        remainingMs?: number;
+        error?: string | null;
+        card?: {
+          displaySuffix?: string;
+          studentId?: string;
+          plateNumber?: string;
+        } | null;
+        message?: string;
+      }>("/api/v1/guard/rfid/await-scan"),
+    guardCancelAwaitScan: () =>
+      apiRequest<{ ok: boolean }>("/api/v1/guard/rfid/await-scan", {
+        method: "DELETE",
       }),
     guardSessions: () =>
       apiRequest<unknown[]>("/api/v1/guard/sessions?status=ACTIVE"),

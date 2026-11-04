@@ -58,9 +58,17 @@ body {
 
 .page-atmosphere {
   background:
-    radial-gradient(1200px 500px at 10% -10%, rgba(0, 93, 170, 0.12), transparent 55%),
-    radial-gradient(900px 420px at 90% 0%, rgba(137, 22, 53, 0.08), transparent 50%),
-    linear-gradient(180deg, #f7f9fc 0%, #eef2f8 100%);
+    radial-gradient(
+      1200px 500px at 10% -10%,
+      color-mix(in srgb, var(--brand-blue) 18%, transparent),
+      transparent 55%
+    ),
+    radial-gradient(
+      900px 420px at 90% 0%,
+      color-mix(in srgb, var(--brand-red) 12%, transparent),
+      transparent 50%
+    ),
+    linear-gradient(180deg, var(--background) 0%, var(--surface) 100%);
 }
 
 @keyframes fade-up {
@@ -102,6 +110,110 @@ body {
 
 .brand-glow {
   animation: soft-pulse 5s ease-in-out infinite;
+}
+
+@keyframes theme-sheet-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes theme-sheet-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.theme-sheet-backdrop {
+  background: rgba(11, 46, 89, 0.38);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: theme-sheet-fade 0.22s ease-out both;
+}
+
+.theme-sheet-panel {
+  animation: theme-sheet-rise 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-sheet-backdrop,
+  .theme-sheet-panel {
+    animation: none;
+  }
+}
+
+/* QR / app theme cartoon motion */
+@keyframes theme-qr-bounce {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-0.8deg);
+  }
+  50% {
+    transform: translateY(-7px) rotate(0.8deg);
+  }
+}
+
+@keyframes theme-sticker-float {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-8px) scale(1.08);
+  }
+}
+
+@keyframes theme-sticker-wiggle {
+  0%,
+  100% {
+    transform: rotate(-8deg);
+  }
+  50% {
+    transform: rotate(10deg);
+  }
+}
+
+@keyframes theme-qr-pop {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+.theme-qr-bounce {
+  animation: theme-qr-bounce 2.2s ease-in-out infinite;
+}
+
+.theme-sticker-float {
+  animation: theme-sticker-float 2.4s ease-in-out infinite;
+}
+
+.theme-sticker-wiggle {
+  animation: theme-sticker-wiggle 1.8s ease-in-out infinite;
+}
+
+.theme-qr-pop {
+  animation: theme-qr-pop 0.7s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-qr-bounce,
+  .theme-sticker-float,
+  .theme-sticker-wiggle,
+  .theme-qr-pop {
+    animation: none;
+  }
 }
 
 /* Mission card — playful cartoon motion */
@@ -350,4 +462,96 @@ body {
   .blind-sparkle {
     animation: none;
   }
+}
+
+/* Live Parking Radar (Leaflet) */
+.parking-radar-map .leaflet-control-attribution {
+  font-size: 9px;
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.parking-radar-map .radar-lot-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+.parking-radar-map .radar-lot-pin {
+  width: 96px;
+  height: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 3px;
+  pointer-events: auto;
+  cursor: pointer;
+  filter: drop-shadow(0 8px 16px rgba(11, 46, 89, 0.22));
+}
+
+.parking-radar-map .radar-lot-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  background: var(--lot-color, #64748b);
+  display: grid;
+  place-items: center;
+  border: 2.5px solid #fff;
+  position: relative;
+}
+
+.parking-radar-map .radar-lot-badge::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -7px;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--lot-color, #64748b);
+}
+
+.parking-radar-map .radar-lot-pin.is-selected .radar-lot-badge {
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--lot-color) 35%, transparent);
+}
+
+.parking-radar-map .radar-lot-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 72px;
+  max-width: 110px;
+  padding: 4px 8px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(11, 46, 89, 0.1);
+  line-height: 1.15;
+}
+
+.parking-radar-map .radar-lot-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #0b2e59;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.parking-radar-map .radar-lot-meta {
+  margin-top: 1px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--lot-color, #64748b);
+}
+
+.parking-radar-map .radar-lot-area {
+  cursor: pointer;
+}
+
+.parking-radar-map .leaflet-container {
+  font-family: inherit;
+  background: #e8eef5;
 }

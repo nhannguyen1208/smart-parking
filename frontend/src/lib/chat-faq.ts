@@ -13,7 +13,6 @@ type FaqRule = {
 export const CHAT_QUICK_REPLIES = [
   "Membership plans",
   "Backup Pass QR",
-  "Kill-Switch",
   "Parking status",
   "SOS help",
 ] as const;
@@ -67,27 +66,6 @@ const RULES: FaqRule[] = [
       text: "Backup Pass is your rotating QR when you lose or forget your RFID card. It counts as your check-in for Rewards. You need an active Daily or Monthly plan first.",
       href: "/qr-pass",
       linkLabel: "Open Backup Pass",
-    },
-  },
-  {
-    id: "kill-switch",
-    keywords: [
-      "kill",
-      "switch",
-      "active",
-      "inactive",
-      "lock",
-      "rfid",
-      "khoa",
-      "khoá",
-      "disable",
-      "enable",
-      "gate lock",
-    ],
-    reply: {
-      text: "Kill-Switch on your student card sets gate access to Active or Inactive. Inactive ignores RFID scans until you turn it back on.",
-      href: "/profile",
-      linkLabel: "Open Profile card",
     },
   },
   {
@@ -157,7 +135,7 @@ export function matchChatFaq(input: string): ChatReply {
   const q = normalize(input);
   if (!q) {
     return {
-      text: "Ask about Membership, Backup Pass, Kill-Switch, Parking status, or SOS — or pick a quick reply below.",
+      text: "Ask about Membership, Backup Pass, Parking status, or SOS — or pick a quick reply below.",
     };
   }
 
@@ -168,12 +146,12 @@ export function matchChatFaq(input: string): ChatReply {
   }
 
   return {
-    text: "I can help with Membership (10k/30k), Backup Pass QR, Kill-Switch (Active/Inactive), Parking status, History, or SOS. For urgent campus issues, contact the guard post or submit SOS on Help.",
+    text: "I can help with Membership (10k/30k), Backup Pass QR, Parking status, History, or SOS. For urgent campus issues, contact the guard post or submit SOS on Help.",
     href: "/help",
     linkLabel: "Go to Help / SOS",
   };
 }
 
 export const CHAT_WELCOME: ChatReply = {
-  text: "Hi — I’m ParkWise Assist. Ask about plans, Backup Pass, Kill-Switch, parking status, or campus SOS.",
+  text: "Hi — I’m ParkWise Assist. Ask about plans, Backup Pass, parking status, or campus SOS.",
 };

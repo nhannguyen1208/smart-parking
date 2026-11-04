@@ -4,7 +4,7 @@ import { User } from "../models/User.js";
 import { RewardTransaction } from "../models/RewardTransaction.js";
 import { getPointsBalance } from "../services/rewards.service.js";
 
-const studentId = process.argv[2] || "STU-NHI";
+const studentId = process.argv[2] || "22040002";
 const amount = Number(process.argv[3] || 500);
 
 await mongoose.connect(env.MONGODB_URI);

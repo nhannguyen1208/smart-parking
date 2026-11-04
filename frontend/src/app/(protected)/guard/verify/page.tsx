@@ -1,16 +1,16 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import Link from "next/link";
 import { api } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
 export default function GuardVerifyPage() {
-  const [credentialRaw, setCredentialRaw] = useState("RFID-NHI-001");
+  const [credentialRaw, setCredentialRaw] = useState("RFID-A1B2C3");
   const [guestToken, setGuestToken] = useState("");
-  const [eventType, setEventType] = useState<"ENTRY" | "EXIT">("ENTRY");
-  const [gateCode, setGateCode] = useState("GATE_A_IN");
+  const [eventType, setEventType] = useState<"AUTO" | "ENTRY" | "EXIT">("AUTO");
   const [result, setResult] = useState<Record<string, unknown> | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -22,7 +22,7 @@ export default function GuardVerifyPage() {
     try {
       const data = await api.v1.guardScan({
         eventType,
-        gateCode,
+        gateCode: eventType === "EXIT" ? "GATE_A_OUT" : "GATE_A_IN",
         credentialRaw: guestToken ? undefined : credentialRaw,
         guestToken: guestToken || undefined,
       });
@@ -35,47 +35,57 @@ export default function GuardVerifyPage() {
     }
   }
 
+  const resolved = String(result?.eventType || "");
+  const outcome = String(result?.result || "");
+
   return (
     <div className="mx-auto max-w-xl space-y-4">
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-red">
-          Guard · Verify
+          Guard · Gate
         </p>
-        <h1 className="mt-1 text-2xl font-semibold text-navy">Simulate RFID / Backup QR</h1>
+        <h1 className="mt-1 text-2xl font-semibold text-navy">
+          Check-in / Check-out
+        </h1>
         <p className="mt-1 text-sm text-muted">
-          Uses the same ParkingService as MQTT events. Labelled{" "}
-          <strong>DEMO</strong> — not a physical reader.
+          Cùng pipeline với ESP32. Chế độ <strong>AUTO</strong>: chưa đỗ →
+          check-in, đang đỗ → check-out. Thẻ mới?{" "}
+          <Link href="/guard/cards" className="font-medium text-brand-blue underline">
+            Đăng ký thẻ RFID
+          </Link>
+          .
         </p>
       </div>
 
       <Card className="p-5">
         <form className="space-y-3" onSubmit={onSubmit}>
           <label className="block text-xs font-medium text-muted">
-            Event type
+            Chế độ
             <select
               className="mt-1 h-11 w-full rounded-xl border border-border px-3 text-sm"
               value={eventType}
-              onChange={(e) => setEventType(e.target.value as "ENTRY" | "EXIT")}
+              onChange={(e) =>
+                setEventType(e.target.value as "AUTO" | "ENTRY" | "EXIT")
+              }
             >
-              <option value="ENTRY">ENTRY</option>
-              <option value="EXIT">EXIT</option>
+              <option value="AUTO">AUTO — tự check-in / check-out</option>
+              <option value="ENTRY">ENTRY — buộc check-in</option>
+              <option value="EXIT">EXIT — buộc check-out</option>
             </select>
           </label>
           <label className="block text-xs font-medium text-muted">
-            Gate code
-            <Input value={gateCode} onChange={(e) => setGateCode(e.target.value)} />
-          </label>
-          <label className="block text-xs font-medium text-muted">
-            RFID credential (demo raw tag)
+            RFID UID / credential
             <Input
+              className="mt-1 font-mono"
               value={credentialRaw}
-              onChange={(e) => setCredentialRaw(e.target.value)}
+              onChange={(e) => setCredentialRaw(e.target.value.toUpperCase())}
               disabled={Boolean(guestToken)}
             />
           </label>
           <label className="block text-xs font-medium text-muted">
-            Or Backup Pass token
+            Hoặc Backup Pass token
             <Input
+              className="mt-1"
               value={guestToken}
               onChange={(e) => setGuestToken(e.target.value)}
               placeholder="Paste GP-… token"
@@ -83,20 +93,31 @@ export default function GuardVerifyPage() {
           </label>
           {error ? <p className="text-sm text-brand-red">{error}</p> : null}
           <Button type="submit" disabled={loading} className="w-full">
-            {loading ? "Processing…" : "Simulate scan"}
+            {loading ? "Processing…" : "Chạy check-in / check-out"}
           </Button>
         </form>
       </Card>
 
       {result ? (
-        <Card className="space-y-1 p-4 text-sm">
+        <Card className="space-y-2 p-4 text-sm">
           <p className="font-semibold text-navy">
-            {String(result.result)} — {String(result.reason)}
+            {outcome}
+            {resolved ? ` · ${resolved}` : ""} — {String(result.reason)}
           </p>
-          <p className="text-xs text-muted">
-            source: {String(result.source || "DEMO")} · labelledDemo:{" "}
-            {String(result.labelledDemo ?? true)}
-          </p>
+          {result.unregisteredCredential ? (
+            <p className="text-xs text-brand-red">
+              Thẻ chưa đăng ký:{" "}
+              <code>{String(result.unregisteredCredential)}</code> —{" "}
+              <Link href="/guard/cards" className="underline">
+                đăng ký ngay
+              </Link>
+            </p>
+          ) : null}
+          {result.session ? (
+            <p className="text-xs text-muted">
+              Session: {JSON.stringify(result.session)}
+            </p>
+          ) : null}
         </Card>
       ) : null}
     </div>

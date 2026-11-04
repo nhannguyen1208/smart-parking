@@ -2,7 +2,7 @@ import mqtt, { type MqttClient } from "mqtt";
 import { z } from "zod";
 import { env, isDemoMode } from "../config/env.js";
 import { GateEventSource } from "../types/enums.js";
-import { processGateEvent } from "./parking.service.js";
+import { emitGateScanProcessed, processGateEvent } from "./parking.service.js";
 
 const gateEventSchema = z.object({
   schemaVersion: z.literal(1),
@@ -57,7 +57,7 @@ export function startMqttBridge() {
       }
       const p = parsed.data;
       // credentialRef is expected to be a tokenized/demo raw tag for lookup in DEMO
-      await processGateEvent({
+      const result = await processGateEvent({
         eventId: p.eventId,
         gateCode: p.gateId,
         eventType: p.eventType,
@@ -65,6 +65,15 @@ export function startMqttBridge() {
         plateNumber: p.plateNumber,
         occurredAt: p.occurredAt,
         source: (p.source as GateEventSource) || GateEventSource.MQTT,
+      });
+      emitGateScanProcessed({
+        ...result,
+        eventId: p.eventId,
+        gateCode: p.gateId,
+        eventType: p.eventType,
+        credentialRef: p.credentialRef,
+        source: p.source || "MQTT",
+        at: new Date().toISOString(),
       });
     } catch (error) {
       console.error("[mqtt] handle failed", error);
